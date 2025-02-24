@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useRouter } from "next/navigation"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -8,19 +9,79 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import Swal from 'sweetalert2'
+import {auth} from "@/lib/firebase"
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, User as type, User, setPersistence, browserLocalPersistence } from "firebase/auth"
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [agreed, setAgreed] = useState(false)
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
     // Handle sign up logic here
-    console.log({ email, password, agreed })
+    //console.log({ email, password, agreed })
+
+    if(!agreed){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please agree to the terms and conditions!',
+      })
+      return
+    }
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password)
+      router.push("/onboarding") // Redirect to /onboarding after successful sign-up
+    } catch (error:any) {
+      console.error(error)
+      if(error.code === "auth/email-already-in-use"){
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Email already in use!',
+        })
+      }
+      return 
+    }
+  }
+  
+  async function signInWithGoogle() {
+    if(!agreed){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please agree to the terms and conditions!',
+      })
+      return
+    }
+    
+    const provider = new GoogleAuthProvider()
+
+    try {
+      setPersistence(auth, browserLocalPersistence)
+      let userCred = await signInWithPopup(auth, provider)
+      let user = userCred.user
+      console.log(user)
+      let saved = await saveToDb(user)
+      if (!saved) {
+        console.error("Failed to save user data to database")
+        return
+      }
+      router.push("/onboarding") // Redirect to /onboarding after successful sign-up
+    } catch (error) {
+      console.error(error)
+    }
   }
 
+  async function saveToDb(user:User) {
+    // Save user data to database
+    return true
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-sm">
@@ -32,7 +93,7 @@ export default function SignUp() {
         <Button
           variant="outline"
           className="w-full flex items-center justify-center gap-2 border-2"
-          onClick={() => console.log("Google sign in")}
+          onClick={() => signInWithGoogle()}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
