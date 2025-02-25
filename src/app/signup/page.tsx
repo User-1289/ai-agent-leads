@@ -35,18 +35,24 @@ export default function SignUp() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
-      router.push("/onboarding") // Redirect to /onboarding after successful sign-up
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      let saved = await saveToDb(user);
+      if (!saved) {
+        console.error("Failed to save user data to database");
+        // Consider showing an error message to the user
+      }
+      router.push("/onboarding"); // Redirect to /onboarding after successful sign-up
     } catch (error:any) {
-      console.error(error)
+      console.error(error);
       if(error.code === "auth/email-already-in-use"){
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
           text: 'Email already in use!',
-        })
+        });
       }
-      return 
+      return;
     }
   }
   
@@ -78,10 +84,34 @@ export default function SignUp() {
     }
   }
 
-  async function saveToDb(user:User) {
-    // Save user data to database
-    return true
+  async function saveToDb(user: User) {
+    try {
+      const response = await fetch('/api/add-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          uid: user.uid,
+          createdAt: user.metadata.creationTime || new Date().toISOString(),
+          isEmailVerified: user.emailVerified,
+          signedIn: user.metadata.lastSignInTime || new Date().toISOString(),
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save user data');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving user to database:', error);
+      return false;
+    }
   }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-sm">

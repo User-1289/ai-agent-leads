@@ -20,10 +20,10 @@ export default function Navbar() {
         </div>
 
         <Link
-          href="#"
+          href="/login"
           className="inline-flex h-9 items-center justify-center rounded-md bg-[#6C5CE7] px-4 text-sm font-medium text-white hover:bg-[#6C5CE7]/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#6C5CE7]"
         >
-          Sign In / Register
+          Log In
         </Link>
       </div>
     </nav>
