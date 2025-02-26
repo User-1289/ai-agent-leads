@@ -7,16 +7,16 @@ export default function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Image src="/placeholder.svg" alt="Uizard.io" width={24} height={24} className="w-6 h-6" />
-          <span className="font-semibold text-lg">Uizard.io</span>
+          <span className="font-semibold text-lg">LeadSurge</span>
         </div>
         
         <div className="hidden md:flex items-center gap-6">
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Home</Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Features</Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Testimonials</Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900">Contact</Link>
+          <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
+          <Link href="#problem" className="text-sm text-gray-600 hover:text-gray-900">What are we solving</Link>
+          <Link href="#solution" className="text-sm text-gray-600 hover:text-gray-900">Our Solution</Link>
+          <Link href="#features" className="text-sm text-gray-600 hover:text-gray-900">Features</Link>
+          <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
+          <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900">Contact</Link>
         </div>
 
         <Link
