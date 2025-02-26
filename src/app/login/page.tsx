@@ -1,24 +1,94 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import Swal from 'sweetalert2'
+import { auth } from "@/lib/firebase"
+import { 
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  setPersistence,
+  browserLocalPersistence 
+} from "firebase/auth"
 
-export default function SignUp() {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [agreed, setAgreed] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign up logic here
-    console.log({ email, password, agreed })
+    
+    try {
+      // Set persistence based on remember me checkbox
+      await setPersistence(auth, browserLocalPersistence)
+      
+      // Sign in with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+      
+      // Update user's login time
+      await updateLoginTime(user.uid)
+      
+      // Redirect to dashboard
+      router.push("/dashboard")
+    } catch (error: any) {
+      console.error(error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: error.message || 'Invalid email or password',
+      })
+    }
+  }
+  
+  async function signInWithGoogle() {
+    const provider = new GoogleAuthProvider()
+    
+    try {
+      await setPersistence(auth, browserLocalPersistence)
+      const userCredential = await signInWithPopup(auth, provider)
+      const user = userCredential.user
+      
+      // Update user's login time
+      await updateLoginTime(user.uid)
+      
+      // Redirect to dashboard
+      router.push("/dashboard")
+    } catch (error: any) {
+      console.error(error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: error.message || 'Failed to sign in with Google',
+      })
+    }
+  }
+  
+  async function updateLoginTime(uid: string) {
+    try {
+      const response = await fetch(`/api/login-user?uid=${uid}`, {
+        method: 'GET',
+      })
+      
+      if (!response.ok) {
+        console.error('Failed to update login time')
+      }
+      
+      return true
+    } catch (error) {
+      console.error('Error updating login time:', error)
+      return false
+    }
   }
 
   return (
@@ -32,7 +102,7 @@ export default function SignUp() {
         <Button
           variant="outline"
           className="w-full flex items-center justify-center gap-2 border-2"
-          onClick={() => console.log("Google sign in")}
+          onClick={() => signInWithGoogle()}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -95,25 +165,18 @@ export default function SignUp() {
 
           <div className="flex items-start">
             <Checkbox
-              id="terms"
-              checked={agreed}
-              onCheckedChange={(checked) => setAgreed(checked as boolean)}
+              id="remember"
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
               className="mt-1"
             />
-            <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-              I agree to the{" "}
-              <Link href="/terms" className="text-[#6C5CE7] hover:underline">
-                Terms & Conditions
-              </Link>{" "}
-              and{" "}
-              <Link href="/privacy" className="text-[#6C5CE7] hover:underline">
-                Privacy Policy
-              </Link>
+            <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
+              Remember me
             </label>
           </div>
 
-          <Button type="submit" className="w-full bg-[#6C5CE7] hover:bg-[#6C5CE7]/90" disabled={!agreed}>
-            Create Account
+          <Button type="submit" className="w-full bg-[#6C5CE7] hover:bg-[#6C5CE7]/90">
+            Login
           </Button>
         </form>
 
@@ -127,4 +190,3 @@ export default function SignUp() {
     </div>
   )
 }
-
