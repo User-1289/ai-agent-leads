@@ -18,6 +18,10 @@ export default function Onboarding() {
   const [formData, setFormData] = useState({
     fullName: "",
     professionalTitle: "",
+    portfolioUrl: "https://",
+    linkedinUrl: "https://linkedin.com/in/",
+    githubUrl: "https://github.com/",
+    xUrl: "https://x.com/",
     skills: [],
     serviceAreas: [],
     platforms: [],
@@ -86,7 +90,14 @@ export default function Onboarding() {
           uid: user.uid,
           skills: formData.skills,
           services: formData.serviceAreas,
-          platform_integrations: formData.platforms
+          platform_integrations: formData.platforms,
+          name:formData.fullName,
+          title:formData.professionalTitle,
+          portfolioUrl:formData.portfolioUrl,
+          linkedinUrl:formData.linkedinUrl,
+          githubUrl:formData.githubUrl,
+          xUrl:formData.xUrl,
+          resumeUrl:"null"
         }),
       })
       

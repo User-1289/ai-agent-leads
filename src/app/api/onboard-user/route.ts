@@ -5,7 +5,7 @@ import { FreelancingInfoSchema } from "@/lib/schemas/FreelancingInfo";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { uid, skills, services, platform_integrations } = body;
+    const { name, title, portfolioUrl, linkedinUrl, resumeUrl, xUrl, githubUrl, uid, skills, services, platform_integrations } = body;
 
     // Validate required fields
     if (!uid) {
@@ -26,6 +26,13 @@ export async function POST(request: NextRequest) {
 
     if (existingInfo) {
       // Update existing record
+      existingInfo.name = name || existingInfo.name;
+      existingInfo.title = title || existingInfo.title;
+      existingInfo.portfolio_url = portfolioUrl || existingInfo.portfolio_url;
+      existingInfo.linkedin_url = linkedinUrl || existingInfo.linkedin_url;
+      existingInfo.resume_url = resumeUrl || existingInfo.resume_url;
+      existingInfo.x_url = xUrl || existingInfo.x_url;
+      existingInfo.github_url = githubUrl || existingInfo.github
       existingInfo.skills = skills || existingInfo.skills;
       existingInfo.services = services || existingInfo.services;
       existingInfo.platform_integrations = platform_integrations || existingInfo.platform_integrations;
@@ -40,6 +47,13 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new record
       const newFreelancingInfo = new FreelancingInfo({
+        name,
+        title,
+        portfolio_url: portfolioUrl,
+        linkedin_url: linkedinUrl,
+        resume_url: resumeUrl,
+        x_url: xUrl,
+        github_url: githubUrl,
         uid,
         skills: skills || [],
         services: services || [],
