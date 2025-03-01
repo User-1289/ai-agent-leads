@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { title } from "process";
 interface Skill {
     name: string;
     proficiency: string;
@@ -11,11 +12,21 @@ const FreelancingInfoSchema = new Schema({
     unique: true,
     ref: 'users' // Reference to User collection
   },
+  name:{
+    type:String,
+    required:true
+  },
+  title:{
+    type:String,
+    required:true
+  },
+  portfolio_url:String,
+  resume_url:String,
+  linkedin_url:String,
+  github_url:String,
+  x_url:String,
   skills: {
-    type: [{
-        name:String,
-        level:String
-    }],
+    type: [String],
     default: []
   },
   services: {

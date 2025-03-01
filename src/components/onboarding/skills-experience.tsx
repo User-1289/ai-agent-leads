@@ -1,79 +1,61 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-
-interface Skill {
-  name: string
-  level: "Beginner" | "Intermediate" | "Expert"
-}
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import ResumeUpload from "./resume-upload";
 
 interface SkillsExperienceProps {
   data: {
-    skills: Skill[]
-  }
-  updateData: (data: Partial<{ skills: Skill[] }>) => void
-  onNext: () => void
-  onBack: () => void
+    skills: string[];
+  };
+  updateData: (data: Partial<{ skills: string[] }>) => void;
+  onNext: () => void;
+  onBack: () => void;
 }
 
-const SUGGESTED_SKILLS = [
-  "React",
-  "Node.js",
-  "Python",
-  "JavaScript",
-  "TypeScript",
-  "UI/UX Design",
-  "Content Writing",
-  "Digital Marketing",
-  "SEO",
-  "Data Analysis",
-  "Project Management",
-]
-
 export default function SkillsExperience({ data, updateData, onNext, onBack }: SkillsExperienceProps) {
-  const [currentSkill, setCurrentSkill] = useState("")
-  const [currentLevel, setCurrentLevel] = useState<Skill["level"]>("Intermediate")
-  const [suggestions, setSuggestions] = useState<string[]>([])
-
+  const [currentSkill, setCurrentSkill] = useState("");
+  
   const handleSkillInput = (value: string) => {
-    setCurrentSkill(value)
-    if (value.length > 0) {
-      setSuggestions(SUGGESTED_SKILLS.filter((skill) => skill.toLowerCase().includes(value.toLowerCase())))
-    } else {
-      setSuggestions([])
-    }
-  }
+    setCurrentSkill(value);
+  };
 
   const addSkill = () => {
-    if (currentSkill && !data.skills.find((s) => s.name === currentSkill)) {
+    if (currentSkill && !data.skills.includes(currentSkill.toLowerCase())) {
       updateData({
-        skills: [...data.skills, { name: currentSkill, level: currentLevel }],
-      })
-      setCurrentSkill("")
-      setSuggestions([])
+        skills: [...data.skills, currentSkill],
+      });
+      setCurrentSkill("");
     }
-  }
+  };
 
   const removeSkill = (skillName: string) => {
     updateData({
-      skills: data.skills.filter((s) => s.name !== skillName),
-    })
-  }
+      skills: data.skills.filter((s) => s !== skillName),
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (data.skills.length > 0) {
-      onNext()
+      onNext();
     }
-  }
+  };
+
+  const addSkillsFromResume = (skillsArr: string[]) => {
+    const uniqueSkills = skillsArr.filter(
+      (skill) => !data.skills.includes(skill.toLowerCase())
+    );
+    
+    updateData({
+      skills: [...data.skills, ...uniqueSkills],
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -81,53 +63,30 @@ export default function SkillsExperience({ data, updateData, onNext, onBack }: S
         <div className="space-y-2">
           <Label>Add Your Skills</Label>
           <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                placeholder="Type a skill..."
-                value={currentSkill}
-                onChange={(e) => handleSkillInput(e.target.value)}
-              />
-              {suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg">
-                  {suggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                      onClick={() => {
-                        setCurrentSkill(suggestion)
-                        setSuggestions([])
-                      }}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Select value={currentLevel} onValueChange={(value: Skill["level"]) => setCurrentLevel(value)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Expert">Expert</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              placeholder="Type a skill..."
+              value={currentSkill}
+              onChange={(e) => handleSkillInput(e.target.value)}
+            />
             <Button type="button" onClick={addSkill}>
               Add
             </Button>
           </div>
         </div>
 
+        <div className="flex flex-col items-center space-y-2">
+          <div>Or</div>
+          <div>Upload your resume and we'll add your skills</div>
+          <ResumeUpload skillsExtracted={addSkillsFromResume} />
+        </div>
+
         <div className="space-y-2">
           <Label>Your Skills</Label>
           <div className="flex flex-wrap gap-2">
             {data.skills.map((skill) => (
-              <Badge key={skill.name} variant="secondary" className="px-3 py-1 text-sm">
-                {skill.name} • {skill.level}
-                <button type="button" onClick={() => removeSkill(skill.name)} className="ml-2 hover:text-destructive">
+              <Badge key={skill} variant="secondary" className="px-3 py-1 text-sm">
+                {skill}
+                <button type="button" onClick={() => removeSkill(skill)} className="ml-2 hover:text-destructive">
                   <X className="w-3 h-3" />
                 </button>
               </Badge>
@@ -145,6 +104,5 @@ export default function SkillsExperience({ data, updateData, onNext, onBack }: S
         </Button>
       </div>
     </form>
-  )
+  );
 }
-

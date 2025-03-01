@@ -7,9 +7,14 @@ interface BasicInfoProps {
   data: {
     fullName: string
     professionalTitle: string
+    portfolioUrl: string
+    linkedinUrl: string
+    githubUrl: string
+    xUrl: string
   }
   updateData: (data: any) => void
   onNext: () => void
+
 }
 
 export default function BasicInfo({ data, updateData, onNext }: BasicInfoProps) {
@@ -40,6 +45,46 @@ export default function BasicInfo({ data, updateData, onNext }: BasicInfoProps) 
             value={data.professionalTitle}
             onChange={(e) => updateData({ professionalTitle: e.target.value })}
             required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="portfolioUrl">Portfolio</Label>
+          <Input
+            id="portfolioUrl"
+            placeholder="https://"
+            value={data.portfolioUrl}
+            onChange={(e) => updateData({ portfolioUrl: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="Linkedin">Linkedin</Label>
+          <Input
+            id="Linkedin"
+            placeholder="https://linkedin.com/in/"
+            value={data.linkedinUrl}
+            onChange={(e) => updateData({ linkedinUrl: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="X">X(Twitter)</Label>
+          <Input
+            id="X"
+            placeholder="https://x.com/"
+            value={data.xUrl}
+            onChange={(e) => updateData({ xUrl: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="Github">Github</Label>
+          <Input
+            id="Github"
+            placeholder="https://github.com/"
+            value={data.githubUrl}
+            onChange={(e) => updateData({ githubUrl: e.target.value })}
           />
         </div>
       </div>
