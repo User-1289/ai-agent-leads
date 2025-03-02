@@ -6,6 +6,7 @@ import Cta from "@/components/landing/cta"
 import Footer from "@/components/landing/footer"
 import Problems from "@/components/landing/problems"
 import Solution from "@/components/landing/solutions"
+import FAQ from "@/components/landing/faq"
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
@@ -15,6 +16,7 @@ export default function Home() {
         <Problems />
         <Solution />
         <Features />
+        <FAQ />
         {/*<Testimonials />*/}
         {/*<Cta />*/}
       </main>
