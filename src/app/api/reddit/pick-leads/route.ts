@@ -21,7 +21,7 @@ const r = new snoowrap({
   userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
   clientId: process.env.REDDIT_APP_ID,
   clientSecret: process.env.REDDIT_APP_SECRET,
-  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxMDM4MDA3LjEwNzUyNiwiaWF0IjoxNzQwOTUxNjA3LjEwNzUyNiwianRpIjoiZXZfX1hkNVZYR2hYZ0REVWVJZUxZM2ZIZFdncWh3IiwiY2lkIjoiTFhCWFFwdjRWVHFKMWdsQnZrMjNkdyIsImxpZCI6InQyX3IwZHVybXdjcSIsImFpZCI6InQyX3IwZHVybXdjcSIsImxjYSI6MTcwMzkxNjk1MTIxNSwic2NwIjoiZUp5S1ZpcEtUVXhSaWdVRUFBRF9fd3ZFQXBrIiwicmNpZCI6IkFWYVc1VHkydnNwOFF2b1JDZVZ6bzdRYlZVb0dMamU3WURzZlpSN0N4RnMiLCJmbG8iOjh9.kxJkCR8rrDhIx3jQZ32Hedn7nQJLJmmdrCmaM5HOSvGdbg1KkEBHojZhV6WocrqIRw29CiFKkLlCMlm3igd5tki3nR5z9EAmMA48YKmRQL8z5htQgGGTn5PdW5jOn9IZpzNDIse62q4cN5gyPT1_HSdB0jeYsM0Dfq61TiVjE36S6XSZDre36WvDnRvqJHi-vq8Fi52YU-K54YKyM7Ds_8Giw1SGWShseIHH4GA_og40xNWiLfefoPeFJOwlTFt__WrTJNZrj8Q_wcQ__J27PyIXehxtmBkOMwZb242QQ-jGkn8LSR6qelqoh4IJM38NbIYfWhfXDPWNpgRsrJjUFA",
+  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxMTY3NDQ2LjQ2MTg5LCJpYXQiOjE3NDEwODEwNDYuNDYxODksImp0aSI6IjVCTnFHSzUyT0ZEaG1sdmdqN1VUeXBnZXppZTJ5QSIsImNpZCI6IkxYQlhRcHY0VlRxSjFnbEJ2azIzZHciLCJsaWQiOiJ0Ml9yMGR1cm13Y3EiLCJhaWQiOiJ0Ml9yMGR1cm13Y3EiLCJsY2EiOjE3MDM5MTY5NTEyMTUsInNjcCI6ImVKeUtWaXBLVFV4UmlnVUVBQURfX3d2RUFwayIsInJjaWQiOiJPWldqVlBtaEpVMVlIRkE0ckRxTERIb0JOTlp4bVlUVGpBV0xZTjhHTkNZIiwiZmxvIjo4fQ.TmB1JlL6Iv8iP6yPwEV5HIKnquZIkYUH-MxGYkS5-5jaVL_Zu64xyyahBPqd-wPzN9EDGfVRkGqW09RHLYMPwwDrq8u_lKDtjSRhFQSraV9xa9lXlvCDxlYwPIfQhaoawlFrOcL74yEb9N7XH1yCSfTEAjlY12G7dBIKuDMEd3iZNGc4ST6vOvvzI1EKBick6yiSItvusayxCtZSP14ofKVKpk3wVpdaGPOdatOx9F3N1KI5DrrFmFAp3PFa7bvbk8mpzIzmSClNLezPTI-dMW4C_LVjDglXZ1I5uj3_51E2BENCHjAcGd09aLvBv5gR8K7JXZCrv8CJWMvd8ZXVsA",
 });
 
 export async function GET(request: NextRequest) {
@@ -41,10 +41,7 @@ export async function GET(request: NextRequest) {
 
   if (!skills) {
     return NextResponse.json({ error: 'Missing skills parameter' }, { status: 400 });
-  }
-  
-  
-  let skillsArr = skills.split(' ');
+  }  
 
       // Connect to MongoDB
       if (!mongoose.connection.readyState) {
@@ -56,7 +53,7 @@ export async function GET(request: NextRequest) {
     const searchResults = await r.getSubreddit("freelance_forhire").search({
       query:`flair:"Hiring" ${skills}`,
       sort: 'relevance',
-      limit
+      limit:50
     });
 
     // Format results
@@ -67,7 +64,7 @@ export async function GET(request: NextRequest) {
       author: post.author.name,
       created_utc: new Date(post.created_utc * 1000).toISOString(),
       body:post.selftext || '[No body content]',
-
+      platform: 'reddit',
     }));
 
     //sort them based on the date'
@@ -122,7 +119,40 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed at openai api' }, { status: 500 });
     }
 
-    return NextResponse.json({message: "Leads saved successfully", leads: JSON.parse(jsonMatch)}, {status: 200});
+    //loop through the results and take one element and loop through the jsonMatch and check if the post_url matches, if it does then add the match index to finalResults
+    const finalResults:any = [];
+    results.forEach((result) => {
+      JSON.parse(jsonMatch).posts.forEach((post:any) => {
+        if (result.url === post.post_url) {
+          finalResults.push(result);
+        }
+      });
+    });
+
+    //return NextResponse.json({message: "Leads saved successfully", leads: JSON.parse(jsonMatch)}, {status: 200});
+    //return NextResponse.json({ results: finalResults }, { status: 200 });
+
+    //save the finalResults to the database
+    const LeadModel = mongoose.models.Leads || mongoose.model("Leads", LeadSchema);
+    try {
+      const newLead = new LeadModel({
+        uid:uid,
+        potential_leads:finalResults.map((lead:any) => ({
+          post_url: lead.url,
+          post_author: lead.author,
+          post_title: lead.title,
+          post_body: lead.body,
+          post_score: lead.score,
+          post_created_utc: lead.created_utc,
+          post_subreddit: "freelance_forhire",
+          platform: "reddit",
+        })),
+      })
+      await newLead.save();
+      return NextResponse.json({ message: "Leads saved successfully", leads: finalResults }, { status: 200 });
+    } catch (error) {
+      return NextResponse.json({ error: 'Failed to save leads', errorMsg:error }, { status: 500 });
+    }
   } catch (error) {
     console.error('Error searching posts:', error);
     return NextResponse.json({ error: 'Failed to fetch search results' }, { status: 500 });

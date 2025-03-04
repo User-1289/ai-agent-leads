@@ -10,7 +10,6 @@ export default function Sidebar() {
         { id: "leads", label: "Leads Manager", icon: Users },
         { id: "outreach", label: "Outreach Automation", icon: Share2 },
         { id: "integrations", label: "Platform Integrations", icon: MessageSquare },
-        { id: "chatbot", label: "AI Assistant Chatbot", icon: Bot },
         { id: "settings", label: "Settings", icon: Settings },
       ]
   return (

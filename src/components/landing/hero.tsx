@@ -26,7 +26,7 @@ export default function Hero() {
             href="/signup"
             className="inline-flex h-11 items-center justify-center rounded-md bg-[#6C5CE7] px-8 text-base font-medium text-white hover:bg-[#6C5CE7]/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#6C5CE7]"
           >
-            Get Started for Free
+            Get Early Access
           </Link>
         </div>
       </div>

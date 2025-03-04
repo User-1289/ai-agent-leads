@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     try {
         const LeadModel = mongoose.models.Leads || mongoose.model("Leads", LeadSchema);
         const leads = await LeadModel
-            .find({ uid })
+            .findOne({ uid })
             .sort({ post_created_utc: -1 })
 
         return NextResponse.json(leads);

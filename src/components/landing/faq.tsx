@@ -14,19 +14,19 @@ type FAQItem = {
 // Sample FAQ data
 const faqData: FAQItem[] = [
   {
-    question: "What is Uizard.io?",
+    question: "What makes this different from Fiverr or Upwork?",
     answer:
-      "Uizard.io is an AI-powered lead management and outreach automation platform designed to help freelancers and businesses streamline their lead generation and follow-up processes.",
+      "Unlike individual job platforms, we actively find and pitch clients for you across multiple channels, increasing your chances of getting work.",
   },
   {
-    question: "How does the AI analyze new leads?",
+    question: "Can I customize the AI-generated pitches?",
     answer:
-      "Our AI system scans various platforms and sources to identify potential leads based on your specified criteria. It then analyzes their profiles, engagement history, and other relevant data to determine the best approach for outreach.",
+      "Yes! You can edit or approve each message before its sent, ensuring full control over outreach.",
   },
   {
-    question: "Can I integrate Uizard.io with other platforms?",
+    question: "How much does it cost?",
     answer:
-      "Yes, Uizard.io offers integrations with popular platforms such as LinkedIn, Upwork, and various CRM systems. You can manage these integrations in the 'Platform Integrations' section of your dashboard.",
+      "Our freemium plan lets you apply to 10 jobs per week, while premium tiers unlock unlimited outreach and advanced CRM features.",
   },
   {
     question: "How does the automated follow-up system work?",
@@ -34,24 +34,9 @@ const faqData: FAQItem[] = [
       "The automated follow-up system uses AI to determine the optimal timing and content for follow-up messages. It takes into account factors such as the lead's engagement history, platform preferences, and your previous interactions to craft personalized follow-ups.",
   },
   {
-    question: "What metrics does Uizard.io track?",
+    question: "What metrics does we use to track?",
     answer:
-      "Uizard.io tracks various metrics including the number of leads contacted, response rates, conversion rates, and pending follow-ups. You can view these metrics on your dashboard and get more detailed analytics in the reports section.",
-  },
-  {
-    question: "How secure is my data on Uizard.io?",
-    answer:
-      "We take data security very seriously. All data is encrypted in transit and at rest. We use industry-standard security protocols and regularly perform security audits to ensure your information is protected.",
-  },
-  {
-    question: "Can I customize the outreach messages?",
-    answer:
-      "While our AI generates initial message templates, you have full control to edit and customize these messages. You can also save your own templates for future use.",
-  },
-  {
-    question: "What kind of support does Uizard.io offer?",
-    answer:
-      "We offer 24/7 customer support via chat and email. For our premium users, we also provide dedicated account managers and priority phone support.",
+      "Various metrics including the number of leads contacted, response rates, conversion rates, and pending follow-ups. You can view these metrics on your dashboard and get more detailed analytics in the reports section.",
   },
 ]
 
@@ -66,7 +51,7 @@ export default function FAQ() {
   )
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
+    <div className="max-w-3xl mx-auto py-12 px-4" id="faq">
       <h1 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h1>
 
       {/* Search input */}
