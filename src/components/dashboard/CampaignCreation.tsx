@@ -1,38 +1,34 @@
 "use client"
 
-import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState, } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { auth } from "@/lib/firebase"
+import { onAuthStateChanged, User } from "firebase/auth"
+import Swal from "sweetalert2"
 
-interface Service {
-  id: string
-  name: string
-}
-
-interface Skill {
-  id: string
-  name: string
-}
-
-const services: Service[] = [
-  { id: "social-media", name: "Social Media Marketing" },
-  { id: "email", name: "Email Campaigns" },
-  { id: "seo", name: "SEO Optimization" },
+const services: string[] = [
+  "Social Media Marketing",
+  "Email Campaigns",
+  "SEO Optimization",
 ]
 
-const skills: Skill[] = [
-  { id: "copywriting", name: "Copywriting" },
-  { id: "graphic-design", name: "Graphic Design" },
-  { id: "data-analysis", name: "Data Analysis" },
+const skills: string[] = [
+  "Copywriting",
+  "Graphic Design",
+  "Data Analysis",
 ]
 
 export default function CampaignCreator() {
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [skills, setSkills] = useState<string[]>([])
+  const [services, setServices] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -44,18 +40,63 @@ export default function CampaignCreator() {
     )
   }
 
+
   const toggleSkill = (skillId: string) => {
     setSelectedSkills((prev) => (prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log({
-      ...formData,
-      services: selectedServices,
-      skills: selectedSkills,
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        setUser(user)
+      }
     })
+  }, [])
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch(`/api/user/retrieve?uid=${user?.uid}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSkills(data.skills)
+        setServices(data.services)
+        console.log(data)
+      }
+    }
+    if (user) {
+      fetchUser()
+    }
+  }, [user])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      //Swal.fire({
+      //  title: 'Fetching leads...',
+      //  text: 'Please wait while we fetch the leads',
+      //  icon: 'info'
+      //})
+      let skillQuery = selectedSkills.join("+")
+      let serviceQuery = selectedServices.join("+")
+      console.log(skillQuery, serviceQuery)
+      //return
+      const res = await fetch(`/api/reddit/pick-leads?campaign_name=${formData.name}&campaign_description=${formData.description}&skills=${skillQuery}&services=${serviceQuery}`)
+      const data = await res.json()
+      console.log(data)
+      Swal.fire({
+        title: 'Success',
+        text: 'Leads fetched successfully',
+        icon: 'success'
+      })
+    } catch (error) {
+      setIsLoading(false)
+      console.error("Error fetching leads:", error)
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to fetch leads',
+        icon: 'error'
+      })
+    }
   }
 
   return (
@@ -99,18 +140,19 @@ export default function CampaignCreator() {
             <div className="flex flex-wrap gap-2">
               {services.map((service) => (
                 <button
-                  key={service.id}
+                  disabled={isLoading}
+                  key={service}
                   type="button"
-                  onClick={() => toggleService(service.id)}
+                  onClick={() => toggleService(service)}
                   className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                     "border border-purple-200 hover:border-purple-300",
-                    selectedServices.includes(service.id)
+                    selectedServices.includes(service)
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "bg-white text-gray-700 hover:bg-gray-50",
                   )}
                 >
-                  {service.name}
+                  {service}
                 </button>
               ))}
             </div>
@@ -122,18 +164,18 @@ export default function CampaignCreator() {
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
                 <button
-                  key={skill.id}
+                  key={skill}
                   type="button"
-                  onClick={() => toggleSkill(skill.id)}
+                  onClick={() => toggleSkill(skill)}
                   className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                     "border border-purple-200 hover:border-purple-300",
-                    selectedSkills.includes(skill.id)
+                    selectedSkills.includes(skill)
                       ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "bg-white text-gray-700 hover:bg-gray-50",
                   )}
                 >
-                  {skill.name}
+                  {skill}
                 </button>
               ))}
             </div>

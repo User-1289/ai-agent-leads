@@ -1,35 +1,42 @@
-import { LeadSchema } from "@/lib/schemas/Leads";
+import createLeadSchema, { LeadSchema } from "@/lib/schemas/Leads";
 import { NextRequest, NextResponse } from "next/server";
 import snoowrap from 'snoowrap';
 import mongoose from "mongoose";
 import OpenAI from "openai";
 import { z } from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
+import { cookies } from "next/headers";
+import  AutoIncrementFactory from 'mongoose-sequence';
+
 
 const openai = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
 const PostUrlSchema = z.object({
   posts: z.array(
     z.object({
-      post_url: z.string()
+      post_url: z.string(),
+      match_reason: z.string()
     })
   ),
 });
 
-const freelanceSubs = ["freelance_forhire", "freelance", "FreelanceProgramming", "freelanceWriters"]
+const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev"]
 
 const r = new snoowrap({
   userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
   clientId: process.env.REDDIT_APP_ID,
   clientSecret: process.env.REDDIT_APP_SECRET,
-  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxMTY3NDQ2LjQ2MTg5LCJpYXQiOjE3NDEwODEwNDYuNDYxODksImp0aSI6IjVCTnFHSzUyT0ZEaG1sdmdqN1VUeXBnZXppZTJ5QSIsImNpZCI6IkxYQlhRcHY0VlRxSjFnbEJ2azIzZHciLCJsaWQiOiJ0Ml9yMGR1cm13Y3EiLCJhaWQiOiJ0Ml9yMGR1cm13Y3EiLCJsY2EiOjE3MDM5MTY5NTEyMTUsInNjcCI6ImVKeUtWaXBLVFV4UmlnVUVBQURfX3d2RUFwayIsInJjaWQiOiJPWldqVlBtaEpVMVlIRkE0ckRxTERIb0JOTlp4bVlUVGpBV0xZTjhHTkNZIiwiZmxvIjo4fQ.TmB1JlL6Iv8iP6yPwEV5HIKnquZIkYUH-MxGYkS5-5jaVL_Zu64xyyahBPqd-wPzN9EDGfVRkGqW09RHLYMPwwDrq8u_lKDtjSRhFQSraV9xa9lXlvCDxlYwPIfQhaoawlFrOcL74yEb9N7XH1yCSfTEAjlY12G7dBIKuDMEd3iZNGc4ST6vOvvzI1EKBick6yiSItvusayxCtZSP14ofKVKpk3wVpdaGPOdatOx9F3N1KI5DrrFmFAp3PFa7bvbk8mpzIzmSClNLezPTI-dMW4C_LVjDglXZ1I5uj3_51E2BENCHjAcGd09aLvBv5gR8K7JXZCrv8CJWMvd8ZXVsA",
+  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxNjg4NDYzLjM1MTkyLCJpYXQiOjE3NDE2MDIwNjMuMzUxOTIsImp0aSI6Inp1LV9CbGdzaF9oY0l1QmFQY05mQUVWLU92VUpLQSIsImNpZCI6IkxYQlhRcHY0VlRxSjFnbEJ2azIzZHciLCJsaWQiOiJ0Ml9yMGR1cm13Y3EiLCJhaWQiOiJ0Ml9yMGR1cm13Y3EiLCJsY2EiOjE3MDM5MTY5NTEyMTUsInNjcCI6ImVKeUtWaXBLVFV4UmlnVUVBQURfX3d2RUFwayIsInJjaWQiOiIyZ2U0aUpJZmdmVmoyc1E2RTB3cnRqUDY4M2pxbmV1UlJscE8zNTBFV2FBIiwiZmxvIjo4fQ.PCxER74XeNs-SWe_OVeVq8hpZ6yEZbFgyc5Ox3EgtiQHXJFxI6T598PRwkjhvg694hOD1jcEj8bGk6TSnPiMryGXqxz6sCS6JqSxZBIuH--QCIDG9lHhSxUroVgz6kqpBoWn7CLXEmAb8CiteV10fyEFl6iyxPTprtuHxA8poSLFWe6KP-Ipf0d9ReGZuh5bnnieRROnJTD76BiHF5UGa8wk5TvIFfpV0lrnzAm85bbioGSMSJ88kBw_0tpBU9GYSpSxG0-pLixmcjbujSJMEq2Z2fqv100lHVD_e0OU66fk9grRSZzaguHBPosTV6inLj8XVlvSKVvwhQAYciXbnQ",
 });
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('query'); 
-  const limit = Number(searchParams.get('limit')) || 5; 
   const skills = searchParams.get('skills') || '';
-  const uid = searchParams.get('uid')
+  const services = searchParams.get('services') || '';
+  const campaign_name = searchParams.get('campaign_name') || 'default';
+  const campaign_description = searchParams.get('campaign_description') || '';
+  //const uid = searchParams.get('uid')
+  const cookieStore = await cookies()
+  const uid = cookieStore.get('uid')?.value
 
   if (!uid) {
     return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
@@ -43,19 +50,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing skills parameter' }, { status: 400 });
   }  
 
+   // console.log(skills);  
+   // return NextResponse.json({skills:skills}, {status:200});
       // Connect to MongoDB
-      if (!mongoose.connection.readyState) {
-        await mongoose.connect(process.env.MONGODB_URI as string);
-      }
       
   try {
     // Perform search in the given subreddit
-    const searchResults = await r.getSubreddit("freelance_forhire").search({
-      query:`flair:"Hiring" ${skills}`,
-      sort: 'relevance',
-      limit:50
-    });
+    //const searchResults = await r.getSubreddit("freelance_forhire").search({
+    //  query:`${skills}`,
+    //  sort: 'relevance',
+    //  limit:50
+    //});
+    //search from all subreddits on a loop
+    const searchResults = [];
+    for (const sub of freelanceSubs) {
+      const results = await r.getSubreddit(sub).search({
+        
+        query: `[HIRING] ${skills} ${services}`,
+        sort: 'relevance',
+        limit:30
+      });
+     // console.log(results);
+      searchResults.push(...results);
+    }
 
+   // console.log(searchResults);
     // Format results
     const results = searchResults.map(post => ({
       title: post.title,
@@ -63,32 +82,26 @@ export async function GET(request: NextRequest) {
       url: post.url,
       author: post.author.name,
       created_utc: new Date(post.created_utc * 1000).toISOString(),
+      subreddit: post.subreddit,
       body:post.selftext || '[No body content]',
       platform: 'reddit',
+      match_reason: "null"
     }));
+
+
 
     //sort them based on the date'
     results.sort(function(a,b){
       return new Date(b.created_utc) - new Date(a.created_utc);
     })
 
-    //saving leads to the database
+    //return NextResponse.json({results:results}, {status:200});
 
-    //const LeadModel = mongoose.models.Leads || mongoose.model("Leads", LeadSchema);
-    //results.forEach(async (lead) => {
-    //    const newLead = new LeadModel({
-    //        uid: uid,
-    //        post_url: lead.url,
-    //        post_author: lead.author,
-    //        post_title: lead.title,
-    //        post_body: lead.body,
-    //        post_score: lead.score,
-    //        post_created_utc: lead.created_utc,
-    //        post_subreddit: "freelance_forhire",
-    //        platform: "reddit",
-    //    });
-    //    await newLead.save();
-    //    });
+    const openaiArr = results.map((result) => ({
+      title: result.title,
+      url: result.url,
+      //body: result.body,
+    }))
 
     let jsonMatch:any;
     try {
@@ -97,34 +110,50 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant for picking the posts which match my skills"
+            content: "You are a helpful assistant for picking the posts which match my skills. Only select URLs that are explicitly provided to you. Do not generate or hallucinate any URLs that are not in the list."
           },
           {
             role: "user",
-            content: `Here are the skills I have: ${skills}`
+            content: `Here are the skills I have: ${skills}. Here are the services I provide: ${services}. Only pick the posts which are [HIRING] and not [FOR HIRE]. Return ONLY URLs that are present in the list I provide you.`
           },
           {
-            role:'user',
-            content:`Here are the posts I found: ${JSON.stringify(results)}`
+            role: 'user',
+            content: `Here are the posts I found: ${JSON.stringify(openaiArr)}. 
+            IMPORTANT: Only select URLs from this exact list. Do not hallucinate or create any URLs that are not in this list.
+            For each match, provide a brief reason why this post matches my skills.`
           }
         ],
         response_format: zodResponseFormat(PostUrlSchema, 'PostUrlSchema'),
+        temperature: 0.1, // Lower temperature for more deterministic outputs
       });
-      jsonMatch = response.choices[0].message.content
-
-      console.log(JSON.parse(jsonMatch));
-
+      jsonMatch = response.choices[0].message.content;
+    
+      // 3. Add validation step to ensure URLs exist in the original array
+      const parsedMatch = JSON.parse(jsonMatch);
+      const validPosts = parsedMatch.posts.filter((post:any) => {
+        // Check if this URL exists in the original results
+        return results.some(result => result.url === post.post_url);
+      });
+      
+      // Replace posts with only the valid posts
+      parsedMatch.posts = validPosts;
+      jsonMatch = JSON.stringify(parsedMatch);
+    
+      console.log("Validated matches:", parsedMatch);
+    
     } catch (error) {
       console.error('Error at openai api', error);
       return NextResponse.json({ error: 'Failed at openai api' }, { status: 500 });
     }
 
     //loop through the results and take one element and loop through the jsonMatch and check if the post_url matches, if it does then add the match index to finalResults
+    const parsedMatch = JSON.parse(jsonMatch);
+    
     const finalResults:any = [];
-    results.forEach((result) => {
-      JSON.parse(jsonMatch).posts.forEach((post:any) => {
+    JSON.parse(jsonMatch).posts.forEach((post:any) => {
+      results.forEach((result:any) => {
         if (result.url === post.post_url) {
-          finalResults.push(result);
+          finalResults.push({...result, match_reason: post.match_reason});
         }
       });
     });
@@ -133,10 +162,16 @@ export async function GET(request: NextRequest) {
     //return NextResponse.json({ results: finalResults }, { status: 200 });
 
     //save the finalResults to the database
-    const LeadModel = mongoose.models.Leads || mongoose.model("Leads", LeadSchema);
-    try {
+    const campaign_id = Math.floor(Math.random() * 1000000);
+    const LeadModel = mongoose.models.Campaign || mongoose.model("Campaign", LeadSchema);
+        try {
       const newLead = new LeadModel({
         uid:uid,
+        campaign_name:campaign_name,
+        campaign_id:campaign_id,
+        campaign_description:campaign_description,
+        skills_selected:skills,
+        services_selected:services,
         potential_leads:finalResults.map((lead:any) => ({
           post_url: lead.url,
           post_author: lead.author,
@@ -144,12 +179,13 @@ export async function GET(request: NextRequest) {
           post_body: lead.body,
           post_score: lead.score,
           post_created_utc: lead.created_utc,
-          post_subreddit: "freelance_forhire",
+          post_subreddit: lead.subreddit.display_name,
           platform: "reddit",
+          match_reason: lead.match_reason
         })),
       })
       await newLead.save();
-      return NextResponse.json({ message: "Leads saved successfully", leads: finalResults }, { status: 200 });
+      return NextResponse.json({ message: "Leads saved successfully", leads: finalResults, skills:skills, services:services }, { status: 200 });
     } catch (error) {
       return NextResponse.json({ error: 'Failed to save leads', errorMsg:error }, { status: 500 });
     }

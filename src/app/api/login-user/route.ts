@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { UserSchema } from "@/lib/schemas/UserSchema";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -27,6 +28,9 @@ export async function GET(request: NextRequest) {
         if (!updatedUser) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
+
+        const cookieStore = await cookies()
+        cookieStore.set("uid", uid)
         
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {

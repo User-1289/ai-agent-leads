@@ -13,10 +13,11 @@ export default function Dashboard() {
   const [selectedNav, setSelectedNav] = useState("dashboard")
   const [leads, setLeads] = useState<any>([])
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [campaigns, setCampaigns] = useState<any>([])
   
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-    { id: "campaign-creation", label: "Create Campaign", icon: BarChart3 },
+    { id: "dashboard", label: "Dashboard", icon: BarChart3, },
+    { id: "campaign-creation", label: "Create Campaign", icon: BarChart3},
     { id: "leads", label: "Leads Manager", icon: Users },
     { id: "outreach", label: "Outreach Automation", icon: Share2 },
     { id: "integrations", label: "Platform Integrations", icon: MessageSquare },
@@ -27,10 +28,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const response = await fetch("/api/leads/retrieve?uid=2MEjasGczqUdmDuKnpCtAycpqlm1")
+        const response = await fetch("/api/campaigns")
         const data = await response.json()
         console.log(data)
-        setLeads(data.potential_leads)
+        setCampaigns(data.campaign)
+        //const response = await fetch("/api/leads/retrieve?uid=2MEjasGczqUdmDuKnpCtAycpqlm1")
+        //const data = await response.json()
+        //console.log(data)
+        //setLeads(data.potential_leads)
       } catch (error) {
         console.error("Error fetching leads:", error)
         setLeads([])
@@ -56,22 +61,31 @@ export default function Dashboard() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  function checkFuncs() {
-    if(selectedNav==="campaign-creation"){
-      MySwal.fire({
-        html: <CampaignCreator />,
-        showConfirmButton: false,
-        showCancelButton: false,
-        background: '#f0f0f0',
-        width: '600px',
-        padding: '0',
-        customClass: {
-          popup: 'rounded-lg shadow-xl',
-        }
-      });
-    }
+
+  function handleCampaignCreation() {
+    MySwal.fire({
+      html: <CampaignCreator />,
+      showConfirmButton: false,
+      showCancelButton: false,
+      background: '#f0f0f0',
+      width: '600px',
+      padding: '0',
+      customClass: {
+        popup: 'rounded-lg shadow-xl',
+      }
+    });
   }
 
+  async function handleCampaignDetails(campaign_id: string) {
+    try {
+      const response = await fetch(`/api/campaigns/${campaign_id}`)
+      const data = await response.json()
+      console.log(data)
+      setLeads(data.campaign.potential_leads)
+    } catch (error) {
+      console.error("Error fetching campaign details:", error)
+    }
+  }
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
       {/* Mobile Sidebar Toggle */}
@@ -93,29 +107,41 @@ export default function Dashboard() {
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <li key={item.id}>
+            <li>
+              <button
+                className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
+                onClick={() => {
+                }}
+              >
+                <BarChart3 size={20} />
+                <span>Campaigns</span>
+              </button>
+              <ul className="pl-6 space-y-1">
+
+                <li>
                   <button
-                    className={`w-full flex items-center space-x-3 p-2 rounded-md transition-colors
-                              ${selectedNav === item.id 
-                                ? 'bg-purple-100 text-purple-700 font-medium' 
-                                : 'text-gray-600 hover:bg-gray-100'}`}
+                    className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
                     onClick={() => {
-                      setSelectedNav(item.id)
-                      if (window.innerWidth < 768) {
-                        setSidebarOpen(false)
-                      };
-                      checkFuncs()
+                      handleCampaignCreation()
                     }}
                   >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
+                    <span className="text-purple-600">Create New Campaign</span>
                   </button>
                 </li>
-              )
-            })}
+                {campaigns.map((campaign:any) => (
+                  <li key={campaign._id}>
+                    <button
+                      onClick={() => {
+                        handleCampaignDetails(campaign.campaign_id)
+                      }}
+                      className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
+                    >
+                      <span>{campaign.campaign_name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </li>
           </ul>
         </nav>
         <div className="p-4 border-t">
