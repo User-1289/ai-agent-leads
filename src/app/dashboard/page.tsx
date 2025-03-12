@@ -25,22 +25,24 @@ export default function Dashboard() {
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
-  useEffect(() => {
-    const fetchLeads = async () => {
-      try {
-        const response = await fetch("/api/campaigns")
-        const data = await response.json()
-        console.log(data)
-        setCampaigns(data.campaign)
-        //const response = await fetch("/api/leads/retrieve?uid=2MEjasGczqUdmDuKnpCtAycpqlm1")
-        //const data = await response.json()
-        //console.log(data)
-        //setLeads(data.potential_leads)
-      } catch (error) {
-        console.error("Error fetching leads:", error)
-        setLeads([])
-      }
+  const fetchLeads = async () => {
+    try {
+      const response = await fetch("/api/campaigns")
+      const data = await response.json()
+      console.log(data)
+      setCampaigns(data.campaign)
+      //const response = await fetch("/api/leads/retrieve?uid=2MEjasGczqUdmDuKnpCtAycpqlm1")
+      //const data = await response.json()
+      //console.log(data)
+      //setLeads(data.potential_leads)
+    } catch (error) {
+      console.error("Error fetching leads:", error)
+      setLeads([])
     }
+  }
+
+  useEffect(() => {
+
     fetchLeads()
   }, [])
   
@@ -73,7 +75,10 @@ export default function Dashboard() {
       customClass: {
         popup: 'rounded-lg shadow-xl',
       }
-    });
+    })
+    .then((result:any) => {
+      fetchLeads()
+    })
   }
 
   async function handleCampaignDetails(campaign_id: string) {

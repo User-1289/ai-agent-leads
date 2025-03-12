@@ -25,7 +25,7 @@ const r = new snoowrap({
   userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
   clientId: process.env.REDDIT_APP_ID,
   clientSecret: process.env.REDDIT_APP_SECRET,
-  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxNjg4NDYzLjM1MTkyLCJpYXQiOjE3NDE2MDIwNjMuMzUxOTIsImp0aSI6Inp1LV9CbGdzaF9oY0l1QmFQY05mQUVWLU92VUpLQSIsImNpZCI6IkxYQlhRcHY0VlRxSjFnbEJ2azIzZHciLCJsaWQiOiJ0Ml9yMGR1cm13Y3EiLCJhaWQiOiJ0Ml9yMGR1cm13Y3EiLCJsY2EiOjE3MDM5MTY5NTEyMTUsInNjcCI6ImVKeUtWaXBLVFV4UmlnVUVBQURfX3d2RUFwayIsInJjaWQiOiIyZ2U0aUpJZmdmVmoyc1E2RTB3cnRqUDY4M2pxbmV1UlJscE8zNTBFV2FBIiwiZmxvIjo4fQ.PCxER74XeNs-SWe_OVeVq8hpZ6yEZbFgyc5Ox3EgtiQHXJFxI6T598PRwkjhvg694hOD1jcEj8bGk6TSnPiMryGXqxz6sCS6JqSxZBIuH--QCIDG9lHhSxUroVgz6kqpBoWn7CLXEmAb8CiteV10fyEFl6iyxPTprtuHxA8poSLFWe6KP-Ipf0d9ReGZuh5bnnieRROnJTD76BiHF5UGa8wk5TvIFfpV0lrnzAm85bbioGSMSJ88kBw_0tpBU9GYSpSxG0-pLixmcjbujSJMEq2Z2fqv100lHVD_e0OU66fk9grRSZzaguHBPosTV6inLj8XVlvSKVvwhQAYciXbnQ",
+  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxODE3NTI5LjM4MjUxOCwiaWF0IjoxNzQxNzMxMTI5LjM4MjUxOCwianRpIjoiVnRnbUpVVkFGWEZaMlJ0ekxXLUpWQTIyeTYySG5RIiwiY2lkIjoiTFhCWFFwdjRWVHFKMWdsQnZrMjNkdyIsImxpZCI6InQyX3IwZHVybXdjcSIsImFpZCI6InQyX3IwZHVybXdjcSIsImxjYSI6MTcwMzkxNjk1MTIxNSwic2NwIjoiZUp5S1ZpcEtUVXhSaWdVRUFBRF9fd3ZFQXBrIiwicmNpZCI6IjAtWDFxME13U3ZILXFFY1dTZ1gtWWJuanFGQmJsc3RJbmhRVjkzMHgxVm8iLCJmbG8iOjh9.p13cDnvEHfeA_JVIdrezr8P-gbILOgedsAMzhNcQDqigAEyejKJQT_txzLa_IW_BjgxnfmLxHd41qyJrse5rzC75Xivqz5xl_hAGk8qvMbV-ZiZEbkg2xb4xbOHDgPnCmMcZ9p5nJ8-KKNlGbgokN7VkepcXvcBOwRL7SWMH4AlZc0fTnm0aV2DIkbSrIq__nQbd_xa7avrG_pCKwbn0uCLQyTnsID99_BpRrn2mSndQwOUgIDuMF5MOCOi82V4875ydLntW7N-sOIsvArUlcmKvThZTBSF2AjBws7DxVJmSy7TSnQYekSEKglYP0SU50UWMwK8-seAh1tQbLNNEvA",
 });
 
 export async function GET(request: NextRequest) {
@@ -38,17 +38,17 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const uid = cookieStore.get('uid')?.value
 
-  if (!uid) {
-    return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
-  }
+  //if (!uid) {
+  //  return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
+  //}
 
   //if (!query) {
   //  return NextResponse.json({ error: 'Missing query parameter' }, { status: 400 });
   //}
 
-  if (!skills) {
-    return NextResponse.json({ error: 'Missing skills parameter' }, { status: 400 });
-  }  
+  //if (!skills || !services) {
+  //  return NextResponse.json({ error: 'Missing skills or services parameter' }, { status: 400 });
+  //}  
 
    // console.log(skills);  
    // return NextResponse.json({skills:skills}, {status:200});
@@ -185,8 +185,10 @@ export async function GET(request: NextRequest) {
         })),
       })
       await newLead.save();
+      console.log("Leads saved successfully", finalResults);
       return NextResponse.json({ message: "Leads saved successfully", leads: finalResults, skills:skills, services:services }, { status: 200 });
     } catch (error) {
+      console.error('Error saving leads:', error);
       return NextResponse.json({ error: 'Failed to save leads', errorMsg:error }, { status: 500 });
     }
   } catch (error) {

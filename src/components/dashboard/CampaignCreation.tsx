@@ -81,6 +81,15 @@ export default function CampaignCreator() {
       console.log(skillQuery, serviceQuery)
       //return
       const res = await fetch(`/api/reddit/pick-leads?campaign_name=${formData.name}&campaign_description=${formData.description}&skills=${skillQuery}&services=${serviceQuery}`)
+      if(res.status !== 200){
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to fetch leads',
+          icon: 'error'
+        })
+        console.error("Failed to fetch leads", await res.json())
+        return
+      }
       const data = await res.json()
       console.log(data)
       Swal.fire({
@@ -182,7 +191,7 @@ export default function CampaignCreator() {
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button disabled={isLoading} type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
             Let's Get You Some Clients
           </Button>
         </form>
