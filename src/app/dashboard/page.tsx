@@ -2,19 +2,52 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import axios from "axios"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, Settings, MessageSquare, Users, Share2, Bot, Mail, ArrowUpRight, Clock, Menu, X } from "lucide-react"
+import { BarChart3, Settings, MessageSquare, Users, Share2, Bot, Mail, ArrowUpRight, Clock, Menu, X, User } from "lucide-react"
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import CampaignCreator from "@/components/dashboard/CampaignCreation"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "@/lib/firebase"
+import { useRouter, useSearchParams } from "next/navigation"
+import FeedbackBot from "@/components/analytics/FeedbackBot"
 export default function Dashboard() {
   const MySwal = withReactContent(Swal);  
   const [selectedNav, setSelectedNav] = useState("dashboard")
   const [leads, setLeads] = useState<any>([])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [campaigns, setCampaigns] = useState<any>([])
-  
+  const [user, setUser] = useState<any>(null)
+  const [alreadyIntegratedReddit, setAlreadyIntegratedReddit] = useState(false)
+  const url = useSearchParams()
+  const router = useRouter()
+  useEffect(() => {
+    const alreadyIntegratedReddit = url.get('already_integrated_reddit')
+    if(alreadyIntegratedReddit){
+        MySwal.fire({
+            title: 'Success',
+            text: 'You have already integrated Reddit',
+            icon: 'success'
+        })
+        // Cannot modify searchParams directly, need to use router
+        router.push('/dashboard')
+    }
+  }, [url, MySwal])
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user)
+        console.log(user)
+      } else {
+        setUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
+
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3, },
     { id: "campaign-creation", label: "Create Campaign", icon: BarChart3},
@@ -25,6 +58,7 @@ export default function Dashboard() {
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
+  
   const fetchLeads = async () => {
     try {
       const response = await fetch("/api/campaigns")
@@ -39,6 +73,17 @@ export default function Dashboard() {
       console.error("Error fetching leads:", error)
       setLeads([])
     }
+  }
+
+  const questions = [
+    "How would you rate your experience with our service on a scale of 1-10?",
+    "What feature do you find most useful in our platform?",
+    "Is there anything we could improve to better serve your needs?",
+  ]
+
+  const handleComplete = (answers: Record<number, string>) => {
+    console.log("Feedback completed:", answers)
+   // setFeedbackData(answers)
   }
 
   useEffect(() => {
@@ -83,8 +128,7 @@ export default function Dashboard() {
 
   async function handleCampaignDetails(campaign_id: string) {
     try {
-      const response = await fetch(`/api/campaigns/${campaign_id}`)
-      const data = await response.json()
+      const { data } = await axios.get(`/api/campaigns/${campaign_id}`)
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
@@ -133,6 +177,7 @@ export default function Dashboard() {
                     <span className="text-purple-600">Create New Campaign</span>
                   </button>
                 </li>
+                
                 {campaigns.map((campaign:any) => (
                   <li key={campaign._id}>
                     <button
@@ -145,7 +190,25 @@ export default function Dashboard() {
                     </button>
                   </li>
                 ))}
+                
               </ul>
+              
+            </li>
+            <li>
+            <button
+                className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
+              >
+                <MessageSquare size={20} />
+                <Link href="/api/reddit/auth">Integrations</Link>
+              </button>
+            </li>
+            <li>
+            <button
+                className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
+              >
+                <User size={20} />
+                <Link href="/user/profile">Update Profile</Link>
+              </button>
             </li>
           </ul>
         </nav>
@@ -167,33 +230,15 @@ export default function Dashboard() {
         <div className="p-4 sm:p-6 md:p-8">
           {/* Welcome Banner */}
           <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold mb-1">Welcome Back, Alex!</h1>
+            <h1 className="text-xl sm:text-2xl font-bold mb-1">Welcome Back, {user?.displayName}!</h1>
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
-            <Button className="w-full">Start New Campaign</Button>
-            <Button variant="outline" className="w-full">Send Follow-Ups</Button>
-            <Button variant="outline" className="w-full">Check Reports</Button>
-          </div>
 
           {/* Lead Activity Feed */}
           <div className="bg-white rounded-lg p-4 sm:p-6 mb-8 overflow-hidden">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="text-lg font-semibold">All Leads</h2>
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <Input placeholder="Search leads..." className="w-full sm:w-64" />
-                <Select defaultValue="contacted">
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="converted">Converted</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="min-w-full">
@@ -241,8 +286,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </main>
-
+        <FeedbackBot questions={questions} onComplete={handleComplete} botName="FeedbackAssistant" />
+        </main>
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (
         <div 

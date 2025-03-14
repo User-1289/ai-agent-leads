@@ -1,7 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+export async function GET(request: NextRequest) {
+  //first check if the user is already logged in
+  let cookieStore = await cookies();
+  const accessToken = cookieStore.get('reddit_access_token')?.value;
+  if(accessToken){
+    return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));
+  }
 
-export async function GET() {
   const CLIENT_ID = process.env.REDDIT_APP_ID;
   const REDIRECT_URI = "http://localhost:4000/api/reddit/callback";
 
@@ -12,7 +18,6 @@ export async function GET() {
   // Generate a random state for CSRF protection
   const state = Math.random().toString(36).substring(2, 15);
 
-  let cookieStore = await cookies();
   // Store the state in cookies (no need to await)
   cookieStore.set('reddit_state', state, { 
     httpOnly: true,

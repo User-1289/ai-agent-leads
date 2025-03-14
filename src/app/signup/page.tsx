@@ -76,6 +76,11 @@ export default function SignUp() {
       let saved = await saveToDb(user)
       if (!saved) {
         console.error("Failed to save user data to database")
+        Swal.fire({
+          icon: 'error',
+          title: 'Already exists',
+          text: 'You already have an account with this email, please login instead',
+        })
         return
       }
       router.push("/onboarding") // Redirect to /onboarding after successful sign-up

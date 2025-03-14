@@ -25,6 +25,7 @@ export default function Onboarding() {
     skills: [],
     serviceAreas: [],
     platforms: [],
+    resumeUrl: "",
   })
 
   const router = useRouter()
@@ -97,7 +98,7 @@ export default function Onboarding() {
           linkedinUrl:formData.linkedinUrl,
           githubUrl:formData.githubUrl,
           xUrl:formData.xUrl,
-          resumeUrl:"null"
+          resumeUrl:formData.resumeUrl,
         }),
       })
       
@@ -109,17 +110,20 @@ export default function Onboarding() {
       // Close the loading indicator
       Swal.close()
       
+
       // Show success message
       Swal.fire({
-        icon: 'success',
+        icon: 'info',
         title: 'Profile Created!',
-        text: 'Your profile has been set up successfully.',
+        text: 'Please authorize the reddit account for the app for integration',
         timer: 2000,
         showConfirmButton: false
       }).then(() => {
         // Redirect to dashboard
         localStorage.setItem('onboard', 'true')
-        router.push('/dashboard')
+
+        router.push('/api/reddit/auth')
+        //router.push('/dashboard')
       })
       
     } catch (error) {

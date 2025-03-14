@@ -17,7 +17,11 @@ try {
   const LeadModel = mongoose.models.Campaign || mongoose.model("Campaign", LeadSchema);
 
   try {
-    const campaign = await LeadModel.findOne({campaign_id:id});
+    const campaign = await LeadModel.findOne({campaign_id:id})
+    //sort them based on the date'
+    const sortedLeads = campaign?.potential_leads.sort((a:any, b:any) => new Date(b.post_created_utc).getTime() - new Date(a.post_created_utc).getTime());
+    campaign.potential_leads = sortedLeads
+    console.log(sortedLeads )
     return NextResponse.json({campaign:campaign}, {status:200});
   } catch (error) {
     return NextResponse.json({error:"Failed to fetch campaign"}, {status:500});

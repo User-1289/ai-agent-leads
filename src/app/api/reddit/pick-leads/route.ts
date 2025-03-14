@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const uid = cookieStore.get('uid')?.value
 
+  const r = new snoowrap({
+    userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
+    clientId: process.env.REDDIT_APP_ID,
+    clientSecret: process.env.REDDIT_APP_SECRET,
+    accessToken:cookieStore.get('reddit_access_token')?.value
+  })
   //if (!uid) {
   //  return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
   //}
@@ -193,6 +199,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error searching posts:', error);
-    return NextResponse.json({ error: 'Failed to fetch search results' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch search results',  }, { status: 500 });
   }
 }
