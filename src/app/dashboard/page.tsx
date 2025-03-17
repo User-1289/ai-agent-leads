@@ -22,6 +22,8 @@ export default function Dashboard() {
   const [campaigns, setCampaigns] = useState<any>([])
   const [user, setUser] = useState<any>(null)
   const [alreadyIntegratedReddit, setAlreadyIntegratedReddit] = useState(false)
+  const [hasFeedback, setHasFeedback] = useState(false)
+  const [askForFeedback, setAskForFeedback] = useState(false)
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
@@ -74,6 +76,42 @@ export default function Dashboard() {
       setLeads([])
     }
   }
+
+  async function checkFeedback(){
+    try {
+      const response = await axios.get("/api/mvp/feedback-check")
+      if(response.status === 200){
+        const data = response.data
+        console.log(data)
+        setHasFeedback(data.hasFeedback)
+        if (!data.hasFeedback && campaigns.length > 0) {
+          setAskForFeedback(true)
+        }
+      }
+    } catch (error) {
+      console.error("Error checking feedback:", error)
+    }
+  }
+
+  useEffect(() => {
+    checkFeedback()
+  }, [campaigns])
+
+  useEffect(() => {
+    console.log(hasFeedback, campaigns.length)
+    if(!hasFeedback && campaigns.length > 0){
+      setAskForFeedback(true)
+      MySwal.fire({
+        title: 'We would love to hear from you!',
+        text: 'Please take a moment to share your thoughts with our bot to help us improve our service.',
+        icon: 'info'
+      })
+    }
+  }, [hasFeedback, campaigns])
+
+  useEffect(() => {
+    console.log("askForFeedback", askForFeedback)
+  }, [askForFeedback])
 
   const questions = [
     "How would you rate your experience with our service on a scale of 1-10?",
@@ -286,7 +324,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <FeedbackBot questions={questions} onComplete={handleComplete} botName="FeedbackAssistant" />
+        <FeedbackBot botName="FeedbackAssistant" open={askForFeedback} />
         </main>
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (

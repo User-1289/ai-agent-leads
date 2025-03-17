@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, Bot, User, CheckCircle, X, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
+import axios from "axios"
+import Swal from "sweetalert2"
 
 interface Message {
   id: string
@@ -15,25 +17,34 @@ interface Message {
 }
 
 interface CompactFeedbackBotProps {
-  questions: string[]
   onComplete?: (answers: Record<number, string>) => void
   botName?: string
   welcomeMessage?: string
   completionMessage?: string
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  open?: boolean
 }
 
+const questions = [
+  "What would you like a tool like this to do for you?",
+  "What are the problems for you now in finding a freelance job?",
+  "Is there any feature you would like to add that could help you?",
+]
+
 export default function CompactFeedbackBot({
-  questions,
   onComplete,
   botName = "FeedbackBot",
   welcomeMessage = "Hi there! I'd like to ask you a few quick questions to get your feedback.",
   completionMessage = "Thank you for your feedback! Your responses have been recorded.",
   position = "bottom-right",
+  open = false
 }: CompactFeedbackBotProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  useEffect(() => {
+    setIsExpanded(open)
+  }, [open])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1)
-  const [answers, setAnswers] = useState<Record<number, string>>({})
+  const [answers, setAnswers] = useState<{ question: string; answer: string }[]>([])
   const [inputValue, setInputValue] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
   const [isComplete, setIsComplete] = useState(false)
@@ -53,17 +64,11 @@ export default function CompactFeedbackBot({
 
   // Initialize chat when expanded for the first time
   useEffect(() => {
-    if (isExpanded && messages.length === 0) {
-      setMessages([{ id: "welcome", type: "bot", text: welcomeMessage }])
-
-      // Show first question after a delay
-      const timer = setTimeout(() => {
-        setCurrentQuestionIndex(0)
-      }, 1000)
-
-      return () => clearTimeout(timer)
+    console.log(isExpanded, messages.length, currentQuestionIndex)
+    if (isExpanded && messages.length === 0 && currentQuestionIndex === -1) {
+      setCurrentQuestionIndex(0)
     }
-  }, [isExpanded, messages.length, welcomeMessage])
+  }, [isExpanded, messages.length, currentQuestionIndex])
 
   // Add new question to chat
   useEffect(() => {
@@ -101,8 +106,9 @@ export default function CompactFeedbackBot({
 
   // Handle completion
   useEffect(() => {
-    if (isComplete && onComplete) {
-      onComplete(answers)
+    if (isComplete) {
+      sendFeedback()
+      onComplete?.(answers)
     }
   }, [isComplete, answers, onComplete])
 
@@ -113,6 +119,27 @@ export default function CompactFeedbackBot({
     }
   }, [isExpanded])
 
+  async function sendFeedback(){
+    console.log(answers)
+    const res = await axios.post('/api/mvp/feedback', {
+      answers
+    })
+    if(res.status !== 200){
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to send feedback',
+        icon: 'error'
+      })
+      console.error(res.data)
+    } else {
+      Swal.fire({
+        title: 'Success',
+        text: 'Thank you for your feedback!',
+        icon: 'success'
+      })
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -122,10 +149,10 @@ export default function CompactFeedbackBot({
     setMessages((prev) => [...prev, { id: `answer-${currentQuestionIndex}`, type: "user", text: inputValue }])
 
     // Store answer
-    setAnswers((prev) => ({
+    setAnswers((prev) => [
       ...prev,
-      [currentQuestionIndex]: inputValue,
-    }))
+      { question: questions[currentQuestionIndex], answer: inputValue }
+    ])
 
     setInputValue("")
 
@@ -295,4 +322,3 @@ export default function CompactFeedbackBot({
     </div>
   )
 }
-
