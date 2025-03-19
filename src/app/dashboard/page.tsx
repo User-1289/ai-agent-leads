@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import axios from "axios"
@@ -14,7 +15,7 @@ import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter, useSearchParams } from "next/navigation"
 import FeedbackBot from "@/components/analytics/FeedbackBot"
-export default function Dashboard() {
+ function DashboardContent() {
   const MySwal = withReactContent(Swal);  
   const [selectedNav, setSelectedNav] = useState("dashboard")
   const [leads, setLeads] = useState<any>([])
@@ -337,4 +338,12 @@ export default function Dashboard() {
       )}
     </div>
   )
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
+  );
 }
