@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         
         query: `[HIRING] ${skills} ${services}`,
         sort: 'relevance',
-        limit:30
+        //limit:30
       });
      // console.log(results);
       searchResults.push(...results);
@@ -96,12 +96,14 @@ export async function GET(request: NextRequest) {
 
 
 
-    //sort them based on the date'
-    results.sort(function(a,b){
-      return new Date(b.created_utc) - new Date(a.created_utc);
-    })
+    // Sort posts by date (newest first)
+    results.sort((a, b) => {
+      const dateA = new Date(a.created_utc).getTime();
+      const dateB = new Date(b.created_utc).getTime();
+      return dateB - dateA;
+    });
 
-    //return NextResponse.json({results:results}, {status:200});
+    // return NextResponse.json({results}, {status: 200}); 
 
     const openaiArr = results.map((result) => ({
       title: result.title,
