@@ -17,7 +17,7 @@ interface Message {
 }
 
 interface CompactFeedbackBotProps {
-  onComplete?: (answers: Record<number, string>) => void
+  onComplete?: (answers: any) => void
   botName?: string
   welcomeMessage?: string
   completionMessage?: string
@@ -178,7 +178,7 @@ export default function CompactFeedbackBot({
   const resetBot = () => {
     setIsExpanded(false)
     setCurrentQuestionIndex(-1)
-    setAnswers({})
+    setAnswers([])
     setInputValue("")
     setMessages([])
     setIsComplete(false)

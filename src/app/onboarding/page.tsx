@@ -22,9 +22,9 @@ export default function Onboarding() {
     linkedinUrl: "https://linkedin.com/in/",
     githubUrl: "https://github.com/",
     xUrl: "https://x.com/",
-    skills: [],
-    serviceAreas: [],
-    platforms: [],
+    skills: [] as string[],
+    serviceAreas: [] as string[],
+    platforms: [] as string[],
     resumeUrl: "",
   })
 
