@@ -15,16 +15,27 @@ import { onAuthStateChanged } from "firebase/auth"
 export default function Onboarding() {
   const [step, setStep] = useState(1)
   const [user, setUser] = useState<any>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    fullName: string;
+    professionalTitle: string;
+    portfolioUrl: string;
+    linkedinUrl: string;
+    githubUrl: string;
+    xUrl: string;
+    skills: string[];
+    serviceAreas: string[];
+    platforms: string[];
+    resumeUrl: string;
+  }>({
     fullName: "",
     professionalTitle: "",
     portfolioUrl: "https://",
     linkedinUrl: "https://linkedin.com/in/",
     githubUrl: "https://github.com/",
     xUrl: "https://x.com/",
-    skills: [] as string[],
-    serviceAreas: [] as string[],
-    platforms: [] as string[],
+    skills: [],
+    serviceAreas: [],
+    platforms: [],
     resumeUrl: "",
   })
 

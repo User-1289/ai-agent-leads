@@ -1,4 +1,4 @@
-import createLeadSchema, { LeadSchema } from "@/lib/schemas/Leads";
+import { LeadSchema } from "@/lib/schemas/Leads";
 import { NextRequest, NextResponse } from "next/server";
 import snoowrap from 'snoowrap';
 import mongoose from "mongoose";
