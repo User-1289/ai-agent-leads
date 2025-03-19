@@ -166,7 +166,7 @@ export default function Dashboard() {
 
   async function handleCampaignDetails(campaign_id: string) {
     try {
-      const { data } = await axios.get(`/api/campaigns/${campaign_id}`)
+      const { data } = await axios.get(`/api/campaigns/retrieve?campaign_id=${campaign_id}`)
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
