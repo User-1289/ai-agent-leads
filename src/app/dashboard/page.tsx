@@ -27,17 +27,19 @@ export default function Dashboard() {
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
-    const alreadyIntegratedReddit = url.get('already_integrated_reddit')
-    if(alreadyIntegratedReddit){
-        MySwal.fire({
-            title: 'Success',
-            text: 'You have already integrated Reddit',
-            icon: 'success'
-        })
-        // Cannot modify searchParams directly, need to use router
-        router.push('/dashboard')
+    if (typeof window === "undefined") return;
+  
+    const alreadyIntegratedReddit = url.get("already_integrated_reddit");
+    if (alreadyIntegratedReddit) {
+      MySwal.fire({
+        title: "Success",
+        text: "You have already integrated Reddit",
+        icon: "success",
+      });
+  
+      router.push("/dashboard");
     }
-  }, [url, MySwal])
+  }, [url, MySwal]);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -216,7 +218,7 @@ export default function Dashboard() {
                   </button>
                 </li>
                 
-                {campaigns.map((campaign:any) => (
+                {campaigns?.map((campaign:any) => (
                   <li key={campaign._id}>
                     <button
                       onClick={() => {
