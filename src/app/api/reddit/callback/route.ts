@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const CLIENT_ID = process.env.REDDIT_APP_ID;
   const CLIENT_SECRET = process.env.REDDIT_APP_SECRET;
-  const REDIRECT_URI = "http://localhost:4000/api/reddit/callback"; // Ensure this matches Reddit App settings
+  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     return NextResponse.json({ error: "Missing Reddit Client credentials" }, { status: 500 });
