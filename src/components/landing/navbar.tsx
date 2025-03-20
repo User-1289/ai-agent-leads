@@ -15,12 +15,12 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image src="/placeholder.svg" alt="Uizard.io" width={24} height={24} className="w-6 h-6" />
-          <span className="font-semibold text-lg">LeadSurge</span>
+          <span className="font-semibold text-lg">FrankLeads</span>
         </div>
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
+        <Link href="#product-demo" className="text-sm text-gray-600 hover:text-gray-900">Product Demo</Link>
           <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
           <Link href="#problem" className="text-sm text-gray-600 hover:text-gray-900">What are we solving</Link>
           <Link href="#solution" className="text-sm text-gray-600 hover:text-gray-900">Our Solution</Link>
@@ -58,6 +58,13 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b shadow-lg animate-in slide-in-from-top">
           <div className="container mx-auto px-4 py-4 flex flex-col">
+            <Link
+              href="#product-demo"
+              className="py-3 px-4 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Product Demo
+            </Link>
             <Link 
               href="/dashboard" 
               className="py-3 px-4 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"

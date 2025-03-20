@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { auth } from "@/lib/firebase"
 import { onAuthStateChanged, User } from "firebase/auth"
 import Swal from "sweetalert2"
+import axios from "axios"
 
 const services: string[] = [
   "Social Media Marketing",
@@ -71,38 +72,41 @@ export default function CampaignCreator() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      //Swal.fire({
-      //  title: 'Fetching leads...',
-      //  text: 'Please wait while we fetch the leads',
-      //  icon: 'info'
-      //})
       let skillQuery = selectedSkills.join("+")
       let serviceQuery = selectedServices.join("+")
       console.log(skillQuery, serviceQuery)
-      //return
-      const res = await fetch(`/api/reddit/pick-leads?campaign_name=${formData.name}&campaign_description=${formData.description}&skills=${skillQuery}&services=${serviceQuery}`)
-      if(res.status !== 200){
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to fetch leads',
-          icon: 'error'
-        })
-        console.error("Failed to fetch leads", await res.json())
-        return
-      }
-      const data = await res.json()
+
+      const { data } = await axios.get('/api/reddit/pick-leads', {
+        params: {
+          campaign_name: formData.name,
+          campaign_description: formData.description, 
+          skills: skillQuery,
+          services: serviceQuery
+        }
+      })
+
       console.log(data)
+      
       Swal.fire({
         title: 'Success',
         text: 'Leads fetched successfully',
         icon: 'success'
       })
+
     } catch (error) {
       setIsLoading(false)
-      console.error("Error fetching leads:", error)
+      
+      let errorMessage = 'Failed to fetch leads'
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || errorMessage
+        console.error("Error fetching leads:", error.response?.data)
+      } else {
+        console.error("Error fetching leads:", error)
+      }
+
       Swal.fire({
         title: 'Error',
-        text: 'Failed to fetch leads',
+        text: errorMessage,
         icon: 'error'
       })
     }

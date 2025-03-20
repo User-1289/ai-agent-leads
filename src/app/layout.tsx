@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LeadSurge",
+  title: "FrankLeads",
   description: "Find leads, automate follow-ups, and close deals faster.",
 };
 

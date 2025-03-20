@@ -31,17 +31,3 @@ export const LeadSchema = new Schema({
         match_reason: String,
     }]
 });
-
-const createLeadSchema = (connection:any) => {
-    const AutoIncrement = AutoIncrementFactory(connection);
-
-
-
-    // Apply Auto-Increment
-    LeadSchema.plugin(AutoIncrement, { inc_field: "campaign_id" });
-
-    return mongoose.models.Campaign || mongoose.model("Campaign", LeadSchema);
-};
-
-// Export function instead of schema directly
-export default createLeadSchema;

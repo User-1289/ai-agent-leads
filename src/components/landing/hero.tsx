@@ -12,7 +12,7 @@ export default function Hero() {
     window.location.href = '/signup'
   }
   return (
-    <section className="relative pt-32 pb-16">
+    <section className="relative ">
       <div
         className="absolute inset-0 bg-cover bg-center bg-gradient-to-r from-blue-700 to-purple-400"
         style={{

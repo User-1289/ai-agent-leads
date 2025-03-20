@@ -8,12 +8,14 @@ import Problems from "@/components/landing/problems"
 import Solution from "@/components/landing/solutions"
 import FAQ from "@/components/landing/faq"
 import HowItWorks from "@/components/landing/working"
+import ProductDemo from "@/components/landing/product-demo"
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
         <Hero />
+        <ProductDemo />
         <Problems />
         <Solution />
         <Features />

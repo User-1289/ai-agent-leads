@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
@@ -24,6 +24,13 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const router = useRouter()
+  const [onBoardStatus, setOnBoardStatus] = useState(false)
+
+  useEffect(()=>{
+    if(window!=null){
+      setOnBoardStatus(localStorage.getItem("onboard") === "true")
+    }
+  }, [])
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
@@ -38,9 +45,13 @@ export default function Login() {
       
       // Update user's login time
       await updateLoginTime(user.uid)
+
+      if(onBoardStatus){
+        router.push("/dashboard")
+      } else {
+        router.push("/onboarding")
+      }
       
-      // Redirect to dashboard
-      router.push("/dashboard")
     } catch (error: any) {
       console.error(error)
       Swal.fire({
@@ -62,8 +73,11 @@ export default function Login() {
       // Update user's login time
       await updateLoginTime(user.uid)
       
-      // Redirect to dashboard
-      router.push("/dashboard")
+      if(onBoardStatus){
+        router.push("/dashboard")
+      } else {
+        router.push("/onboarding")
+      }
     } catch (error: any) {
       console.error(error)
       Swal.fire({

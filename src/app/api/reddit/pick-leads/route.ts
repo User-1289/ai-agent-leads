@@ -1,4 +1,4 @@
-import createLeadSchema, { LeadSchema } from "@/lib/schemas/Leads";
+import { LeadSchema } from "@/lib/schemas/Leads";
 import { NextRequest, NextResponse } from "next/server";
 import snoowrap from 'snoowrap';
 import mongoose from "mongoose";
@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const uid = cookieStore.get('uid')?.value
 
+  const r = new snoowrap({
+    userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
+    clientId: process.env.REDDIT_APP_ID,
+    clientSecret: process.env.REDDIT_APP_SECRET,
+    accessToken:cookieStore.get('reddit_access_token')?.value
+  })
   //if (!uid) {
   //  return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
   //}
@@ -68,7 +74,7 @@ export async function GET(request: NextRequest) {
         
         query: `[HIRING] ${skills} ${services}`,
         sort: 'relevance',
-        limit:30
+        //limit:30
       });
      // console.log(results);
       searchResults.push(...results);
@@ -90,12 +96,14 @@ export async function GET(request: NextRequest) {
 
 
 
-    //sort them based on the date'
-    results.sort(function(a,b){
-      return new Date(b.created_utc) - new Date(a.created_utc);
-    })
+    // Sort posts by date (newest first)
+    results.sort((a, b) => {
+      const dateA = new Date(a.created_utc).getTime();
+      const dateB = new Date(b.created_utc).getTime();
+      return dateB - dateA;
+    });
 
-    //return NextResponse.json({results:results}, {status:200});
+    // return NextResponse.json({results}, {status: 200}); 
 
     const openaiArr = results.map((result) => ({
       title: result.title,
@@ -193,6 +201,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error searching posts:', error);
-    return NextResponse.json({ error: 'Failed to fetch search results' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch search results',  }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import type React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "../ui/textarea"
 
 interface BasicInfoProps {
   data: {
@@ -10,7 +11,8 @@ interface BasicInfoProps {
     portfolioUrl: string
     linkedinUrl: string
     githubUrl: string
-    xUrl: string
+    xUrl: string,
+    resumeUrl: string
   }
   updateData: (data: any) => void
   onNext: () => void
@@ -45,6 +47,16 @@ export default function BasicInfo({ data, updateData, onNext }: BasicInfoProps) 
             value={data.professionalTitle}
             onChange={(e) => updateData({ professionalTitle: e.target.value })}
             required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="resumeUrl">Resume</Label>
+          <Input
+            id="resumeUrl"
+            placeholder="https://"
+            value={data.resumeUrl}
+            onChange={(e) => updateData({ resumeUrl: e.target.value })}
           />
         </div>
 
