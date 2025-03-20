@@ -34,6 +34,10 @@ const UserSchema = new mongoose.Schema({
         signedIn: {
             type: String,
             required: true
+        },
+        plan:{
+            type: String,
+            required: true
         }
     });
 
