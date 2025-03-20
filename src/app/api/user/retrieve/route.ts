@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Failed to connect to database" }, { status: 500 })
   }
 
-  const userInfo = mongoose.models.freelanceinfos || mongoose.model("freelanceinfos", FreelancingInfoSchema)
+  const userInfo = mongoose.models.users || mongoose.model("users", UserSchema)
   const user = await userInfo.findOne({ uid: uid })
   console.log(user)
   if (!user) {

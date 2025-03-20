@@ -11,7 +11,7 @@ import { BarChart3, Settings, MessageSquare, Users, Share2, Bot, Mail, ArrowUpRi
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import CampaignCreator from "@/components/dashboard/CampaignCreation"
-import { onAuthStateChanged } from "firebase/auth"
+import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter, useSearchParams } from "next/navigation"
 import FeedbackBot from "@/components/analytics/FeedbackBot"
@@ -22,6 +22,7 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [campaigns, setCampaigns] = useState<any>([])
   const [user, setUser] = useState<any>(null)
+  const [userFromDB, setUserFromDB] = useState<any>(null)
   const [alreadyIntegratedReddit, setAlreadyIntegratedReddit] = useState(false)
   const [hasFeedback, setHasFeedback] = useState(false)
   const [askForFeedback, setAskForFeedback] = useState(false)
@@ -52,6 +53,24 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
     })
     return () => unsubscribe()
   }, [])
+  useEffect(() => {
+    const fetchUser = async() =>{
+      try {
+        const response = await axios.get(`/api/user/retrieve?uid=${user?.uid}`)
+        if(response.status === 200){
+          setUserFromDB(response.data)
+        }
+        else{
+          console.error("Failed to fetch user")
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      }
+    }
+    if(user){
+      fetchUser()
+    }
+  }, [user])
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3, },
@@ -101,7 +120,6 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
   }, [campaigns])
 
   useEffect(() => {
-    console.log(hasFeedback, campaigns.length)
     if(!hasFeedback && campaigns.length > 0){
       setAskForFeedback(true)
       MySwal.fire({
@@ -174,6 +192,19 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
       setLeads(data.campaign.potential_leads)
     } catch (error) {
       console.error("Error fetching campaign details:", error)
+    }
+  }
+
+  async function signOutFromFrank() {
+    try {
+      await signOut(auth)
+      const logoutUser = await axios.get("/api/user/logout")
+      if(logoutUser.status === 200){
+        console.log("User logged out successfully")
+        router.push("/")
+      }
+    } catch (error) {
+      console.error("Error signing out from Frank:", error)
     }
   }
   return (
@@ -256,11 +287,15 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-              <span className="text-purple-700 font-semibold">A</span>
+              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0)}</span>
             </div>
             <div>
-              <p className="font-medium text-sm">Alex Smith</p>
-              <p className="text-xs text-gray-500">Free Plan</p>
+              <p className="font-medium text-sm">{user?.displayName}</p>
+              <p className="text-xs text-gray-500">{userFromDB?.plan}</p>
+            </div>
+            <div>
+              <button onClick={() => {
+              signOutFromFrank()}} className="bg-purple-600 text-white px-4 py-2 rounded-md">Logout</button>
             </div>
           </div>
         </div>
