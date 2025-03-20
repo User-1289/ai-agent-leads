@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
   }
 
   const CLIENT_ID = process.env.REDDIT_APP_ID;
-  const REDIRECT_URI = "http://localhost:4000/api/reddit/callback";
+  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string;
 
-  if (!CLIENT_ID) {
-    return NextResponse.json({ error: "Missing Reddit Client ID" }, { status: 500 });
+  if (!CLIENT_ID || !REDIRECT_URI) {
+    return NextResponse.json({ error: "Missing Reddit Client ID or Redirect URI" }, { status: 500 });
   }
 
   // Generate a random state for CSRF protection

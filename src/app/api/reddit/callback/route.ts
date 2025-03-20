@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     cookieStore.set("reddit_refresh_token", tokenData.refresh_token, { httpOnly: true, secure: true, sameSite: "lax" });
 
     // Redirect to your frontend's success page
-    return NextResponse.redirect("http://localhost:4000/dashboard");
+    return NextResponse.redirect(`${request.nextUrl.origin}/dashboard`);
 
   } catch (error) {
     console.error("Error exchanging code for tokens:", error);
