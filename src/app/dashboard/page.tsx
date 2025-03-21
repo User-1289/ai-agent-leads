@@ -47,6 +47,7 @@ function DashboardContent() {
         setUser(user)
         console.log(user)
       } else {
+        router.push("/login")
         setUser(null)
       }
     })
@@ -208,6 +209,7 @@ function DashboardContent() {
       console.error("Error signing out from Frank:", error)
     }
   }
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
       {/* Mobile Sidebar Toggle */}
@@ -380,7 +382,7 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-
+      
       <Suspense fallback={<div>Loading...</div>}>
         <DashboardContent />
       </Suspense>
