@@ -1,3 +1,4 @@
+export const maxDuration = 60
 import { LeadSchema } from "@/lib/schemas/Leads";
 import { NextRequest, NextResponse } from "next/server";
 import snoowrap from 'snoowrap';
