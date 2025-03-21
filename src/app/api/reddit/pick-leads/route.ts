@@ -162,6 +162,14 @@ export async function GET(request: NextRequest) {
     //return NextResponse.json({message: "Leads saved successfully", leads: JSON.parse(jsonMatch)}, {status: 200});
     //return NextResponse.json({ results: finalResults }, { status: 200 });
 
+    try {
+      if (!mongoose.connection.readyState) {
+        await mongoose.connect(process.env.MONGODB_URI as string);
+      }
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error);
+      return NextResponse.json({ error: 'Failed to connect to MongoDB' }, { status: 500 });
+    }
     //save the finalResults to the database
     const campaign_id = Math.floor(Math.random() * 1000000);
     const LeadModel = mongoose.models.Campaign || mongoose.model("Campaign", LeadSchema);
