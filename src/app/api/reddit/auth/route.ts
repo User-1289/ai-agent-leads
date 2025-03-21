@@ -3,13 +3,13 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   //first check if the user is already logged in
   let cookieStore = await cookies();
-  const accessToken = cookieStore.get('reddit_access_token')?.value;
-  if(accessToken){
-    return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));
-  }
+  //const accessToken = cookieStore.get('reddit_access_token')?.value;
+  //if(accessToken){
+  //  return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));
+  //}
 
   const CLIENT_ID = process.env.REDDIT_APP_ID;
-  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string;
+  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string || "http://localhost:4000/api/reddit/callback"
 
   if (!CLIENT_ID || !REDIRECT_URI) {
     return NextResponse.json({ error: "Missing Reddit Client ID or Redirect URI" }, { status: 500 });

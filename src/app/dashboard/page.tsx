@@ -15,7 +15,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter, useSearchParams } from "next/navigation"
 import FeedbackBot from "@/components/analytics/FeedbackBot"
- function DashboardContent() {
+function DashboardContent() {
   const MySwal = withReactContent(Swal);  
   const [selectedNav, setSelectedNav] = useState("dashboard")
   const [leads, setLeads] = useState<any>([])
@@ -29,17 +29,16 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
-    if (typeof window === "undefined") return;
-  
-    const alreadyIntegratedReddit = url.get("already_integrated_reddit");
-    if (alreadyIntegratedReddit) {
-      MySwal.fire({
-        title: "Success",
-        text: "You have already integrated Reddit",
-        icon: "success",
-      });
-  
-      router.push("/dashboard");
+    if (typeof window !== "undefined") {
+      const alreadyIntegratedReddit = url.get("already_integrated_reddit");
+      if (alreadyIntegratedReddit) {
+        MySwal.fire({
+          title: "Success",
+          text: "You have already integrated Reddit",
+          icon: "success",
+        });
+        router.push("/dashboard");
+      }
     }
   }, [url, MySwal]);
   useEffect(() => {
@@ -120,7 +119,7 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
   }, [campaigns])
 
   useEffect(() => {
-    if(!hasFeedback && campaigns.length > 0){
+    if(!hasFeedback && campaigns && campaigns.length > 0){
       setAskForFeedback(true)
       MySwal.fire({
         title: 'We would love to hear from you!',
@@ -169,11 +168,12 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
 
 
   function handleCampaignCreation() {
-    MySwal.fire({
-      html: <CampaignCreator />,
-      showConfirmButton: false,
-      showCancelButton: false,
-      background: '#f0f0f0',
+    if(window!==null){
+      MySwal.fire({
+        html: <CampaignCreator />,
+        showConfirmButton: false,
+        showCancelButton: false,
+        background: '#f0f0f0',
       width: '600px',
       padding: '0',
       customClass: {
@@ -183,6 +183,7 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
     .then((result:any) => {
       fetchLeads()
     })
+    }
   }
 
   async function handleCampaignDetails(campaign_id: string) {
@@ -306,7 +307,9 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
         <div className="p-4 sm:p-6 md:p-8">
           {/* Welcome Banner */}
           <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold mb-1">Welcome Back, {user?.displayName}!</h1>
+            <h1 className="text-xl sm:text-2xl font-bold mb-1">
+              {user ? `Welcome Back, ${user.displayName}!` : "Loading..."}
+            </h1>
           </div>
 
           {/* Action Buttons */}
@@ -335,7 +338,7 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
                         <td className="py-4 px-4">
                           <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs whitespace-nowrap">
                             <Clock size={14} className="inline-block mr-1" />
-                            {new Date(lead.post_created_utc).toLocaleDateString('en-GB')}
+                            {new Date(lead.post_created_utc).toISOString().split('T')[0]}
                           </span>
                         </td>
                         <td className="py-4 px-4 sm:pr-0">
@@ -377,8 +380,9 @@ import FeedbackBot from "@/components/analytics/FeedbackBot"
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
-    </Suspense>
-  );
+
+      <Suspense fallback={<div>Loading...</div>}>
+        <DashboardContent />
+      </Suspense>
+  )
 }

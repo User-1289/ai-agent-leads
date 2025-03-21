@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const CLIENT_ID = process.env.REDDIT_APP_ID;
   const CLIENT_SECRET = process.env.REDDIT_APP_SECRET;
-  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string
+  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string || "http://localhost:4000/api/reddit/callback"
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     return NextResponse.json({ error: "Missing Reddit Client credentials" }, { status: 500 });
@@ -50,8 +50,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Store tokens securely in cookies (or a database)
-    cookieStore.set("reddit_access_token", tokenData.access_token, { httpOnly: true, secure: true, sameSite: "lax" });
-    cookieStore.set("reddit_refresh_token", tokenData.refresh_token, { httpOnly: true, secure: true, sameSite: "lax" });
+    cookieStore.set("reddit_access_token", tokenData.access_token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: tokenData.exires_in });
+    cookieStore.set("reddit_refresh_token", tokenData.refresh_token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 30 }); // Refresh token for 30 days
 
     // Redirect to your frontend's success page
     return NextResponse.redirect(`${request.nextUrl.origin}/dashboard`);

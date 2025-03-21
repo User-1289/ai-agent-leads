@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import Swal from 'sweetalert2'
 import { auth } from "@/lib/firebase"
+import axios from "axios"
 import { 
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -88,22 +89,30 @@ export default function Login() {
     }
   }
   
-  async function updateLoginTime(uid: string) {
-    try {
-      const response = await fetch(`/api/login-user?uid=${uid}`, {
-        method: 'GET',
-      })
-      
-      if (!response.ok) {
-        console.error('Failed to update login time')
-      }
-      
-      return true
-    } catch (error) {
-      console.error('Error updating login time:', error)
-      return false
+async function updateLoginTime(uid: string) {
+  try {
+    const response = await axios.get(`/api/login-user?uid=${uid}`);
+    
+    if (response.status !== 200) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update login time'
+      });
+      return false;
     }
+    
+    return true;
+  } catch (error) {
+    console.error('Error updating login time:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to update login time'
+    });
+    return false;
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

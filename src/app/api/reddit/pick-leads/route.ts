@@ -21,13 +21,6 @@ const PostUrlSchema = z.object({
 
 const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev"]
 
-const r = new snoowrap({
-  userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
-  clientId: process.env.REDDIT_APP_ID,
-  clientSecret: process.env.REDDIT_APP_SECRET,
-  accessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNIQTI1NjpzS3dsMnlsV0VtMjVmcXhwTU40cWY4MXE2OWFFdWFyMnpLMUdhVGxjdWNZIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNzQxODE3NTI5LjM4MjUxOCwiaWF0IjoxNzQxNzMxMTI5LjM4MjUxOCwianRpIjoiVnRnbUpVVkFGWEZaMlJ0ekxXLUpWQTIyeTYySG5RIiwiY2lkIjoiTFhCWFFwdjRWVHFKMWdsQnZrMjNkdyIsImxpZCI6InQyX3IwZHVybXdjcSIsImFpZCI6InQyX3IwZHVybXdjcSIsImxjYSI6MTcwMzkxNjk1MTIxNSwic2NwIjoiZUp5S1ZpcEtUVXhSaWdVRUFBRF9fd3ZFQXBrIiwicmNpZCI6IjAtWDFxME13U3ZILXFFY1dTZ1gtWWJuanFGQmJsc3RJbmhRVjkzMHgxVm8iLCJmbG8iOjh9.p13cDnvEHfeA_JVIdrezr8P-gbILOgedsAMzhNcQDqigAEyejKJQT_txzLa_IW_BjgxnfmLxHd41qyJrse5rzC75Xivqz5xl_hAGk8qvMbV-ZiZEbkg2xb4xbOHDgPnCmMcZ9p5nJ8-KKNlGbgokN7VkepcXvcBOwRL7SWMH4AlZc0fTnm0aV2DIkbSrIq__nQbd_xa7avrG_pCKwbn0uCLQyTnsID99_BpRrn2mSndQwOUgIDuMF5MOCOi82V4875ydLntW7N-sOIsvArUlcmKvThZTBSF2AjBws7DxVJmSy7TSnQYekSEKglYP0SU50UWMwK8-seAh1tQbLNNEvA",
-});
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const skills = searchParams.get('skills') || '';
@@ -74,7 +67,7 @@ export async function GET(request: NextRequest) {
         
         query: `[HIRING] ${skills} ${services}`,
         sort: 'relevance',
-        //limit:30
+        limit:30
       });
      // console.log(results);
       searchResults.push(...results);

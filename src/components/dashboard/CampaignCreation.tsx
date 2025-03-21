@@ -55,7 +55,7 @@ export default function CampaignCreator() {
   }, [])
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await fetch(`/api/user/retrieve?uid=${user?.uid}`)
+      const response = await fetch(`/api/user/freelance-data/retrieve?uid=${user?.uid}`)
       if (response.ok) {
         const data = await response.json()
         setSkills(data.skills)

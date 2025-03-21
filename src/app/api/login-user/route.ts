@@ -30,7 +30,12 @@ export async function GET(request: NextRequest) {
         }
 
         const cookieStore = await cookies()
-        cookieStore.set("uid", uid)
+        cookieStore.set("uid", uid, {
+            expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Set cookie to expire in 1 year
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite:'strict'
+        })
         
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
