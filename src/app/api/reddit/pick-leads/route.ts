@@ -67,7 +67,6 @@ export async function GET(request: NextRequest) {
         
         query: `[HIRING] ${skills} ${services}`,
         sort: 'relevance',
-        limit:30
       });
      // console.log(results);
       searchResults.push(...results);

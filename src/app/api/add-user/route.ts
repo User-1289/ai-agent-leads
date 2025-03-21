@@ -31,7 +31,12 @@ export async function POST(request:NextRequest){
         await user.save()
 
         const cookieStore = await cookies()
-        cookieStore.set("uid", uid)
+        cookieStore.set("uid", uid, {
+            expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Set cookie to expire in 1 year
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite:'strict'
+        })
         return NextResponse.json({ success: true }, { status: 201 })
     } catch (error:any) {
         console.error(error)
