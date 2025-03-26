@@ -19,6 +19,7 @@ export const LeadSchema = new Schema({
     potential_leads: [{
         post_url: {
             type: String,
+            unique: true,
         },
         post_author: String,
         post_title: String,

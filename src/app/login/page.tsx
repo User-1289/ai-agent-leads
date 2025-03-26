@@ -92,8 +92,9 @@ export default function Login() {
 async function updateLoginTime(uid: string) {
   try {
     const response = await axios.get(`/api/login-user?uid=${uid}`);
-    
+
     if (response.status !== 200) {
+      console.log('Failed to update login time:', response);
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -102,9 +103,17 @@ async function updateLoginTime(uid: string) {
       return false;
     }
     
+    //return true;
+    let checkIfUserOnboarded = await axios.get("/api/user/freelance-data/retrieve?uid="+uid)
+    if(checkIfUserOnboarded.status!==200){
+      throw new Error("Failed to check if user onboarded", checkIfUserOnboarded.data.error)
+    }
+    if(checkIfUserOnboarded.data!==null && checkIfUserOnboarded.data!==undefined){
+      localStorage.setItem("onboard", "true")
+    }
     return true;
   } catch (error) {
-    console.error('Error updating login time:', error);
+    console.error('Error: ', error);
     Swal.fire({
       icon: 'error',
       title: 'Error',

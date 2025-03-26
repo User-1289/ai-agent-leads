@@ -10,7 +10,7 @@ import { auth } from "@/lib/firebase"
 import { onAuthStateChanged, User } from "firebase/auth"
 import Swal from "sweetalert2"
 import axios from "axios"
-
+import CompactFeedbackBot from "../analytics/FeedbackBot"
 const services: string[] = [
   "Social Media Marketing",
   "Email Campaigns",
@@ -76,7 +76,7 @@ export default function CampaignCreator() {
       let serviceQuery = selectedServices.join("+")
       console.log(skillQuery, serviceQuery)
 
-      const { data } = await axios.get('/api/reddit/pick-leads', {
+      const res = await axios.get('/api/reddit/pick-leads', {
         params: {
           campaign_name: formData.name,
           campaign_description: formData.description, 
@@ -84,33 +84,27 @@ export default function CampaignCreator() {
           services: serviceQuery
         }
       })
-
-      console.log(data)
       
-      Swal.fire({
-        title: 'Success',
-        text: 'Leads fetched successfully',
-        icon: 'success'
-      })
-
-    } catch (error) {
-      setIsLoading(false)
-      
-      let errorMessage = 'Failed to fetch leads'
-      if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || errorMessage
-        console.error("Error fetching leads:", error.response?.data)
-      } else {
-        console.error("Error fetching leads:", error)
+      if(res.status !== 200) {
+        throw new Error(`Failed to fetch leads: ${res.data.error}`)
       }
+        Swal.fire({
+          title: 'Success',
+          text: 'Leads fetched successfully',
+          icon: 'success'
+        }).then(() => {
+          //get the user to give feedback by displaying the feedback bot component inside swal
+        })
 
+    } catch (error:any) {
+      setIsLoading(false)
       Swal.fire({
         title: 'Error',
-        text: errorMessage,
+        text: error.message,
         icon: 'error'
       })
     }
-  }
+  } 
 
   return (
     <div className="min-w-screen bg-gray-50 py-12">

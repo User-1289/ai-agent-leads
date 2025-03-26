@@ -132,6 +132,17 @@ function DashboardContent() {
 
   useEffect(() => {
     console.log("askForFeedback", askForFeedback)
+    MySwal.fire({
+      html: <FeedbackBot popupDisplay={false} position="center" botName="FeedbackAssistant" open={true} onComplete={handleComplete} />,
+      showConfirmButton: false,
+      showCancelButton: false,
+      background: '#f0f0f0',
+      width: '600px',
+      padding: '0',
+      customClass: {
+        popup: 'rounded-lg shadow-xl',
+      }
+    })
   }, [askForFeedback])
 
   const questions = [
@@ -175,11 +186,11 @@ function DashboardContent() {
         showConfirmButton: false,
         showCancelButton: false,
         background: '#f0f0f0',
-      width: '600px',
-      padding: '0',
-      customClass: {
-        popup: 'rounded-lg shadow-xl',
-      }
+        width: '600px',
+        padding: '0',
+        customClass: {
+          popup: 'rounded-lg shadow-xl',
+        }
     })
     .then((result:any) => {
       fetchLeads()
@@ -200,6 +211,7 @@ function DashboardContent() {
   async function signOutFromFrank() {
     try {
       await signOut(auth)
+      localStorage.removeItem("onboard")
       const logoutUser = await axios.get("/api/user/logout")
       if(logoutUser.status === 200){
         console.log("User logged out successfully")
@@ -227,7 +239,7 @@ function DashboardContent() {
                        w-64 md:w-1/5 lg:w-1/6 z-30
                        bg-white border-r flex flex-col shadow-lg md:shadow-none`}>
         <div className="p-4 border-b">
-          <h2 className="text-xl font-bold text-purple-600">LeadSurge</h2>
+          <h2 className="text-xl font-bold text-purple-600">FrankLeads</h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
@@ -274,7 +286,7 @@ function DashboardContent() {
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <MessageSquare size={20} />
-                <Link href="/api/reddit/auth">Integrations</Link>
+                <Link href="/api/reddit/check-auth">Integrations</Link>
               </button>
             </li>
             <li>

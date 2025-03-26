@@ -21,8 +21,9 @@ interface CompactFeedbackBotProps {
   botName?: string
   welcomeMessage?: string
   completionMessage?: string
-  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left" | "center"
   open?: boolean
+  popupDisplay?: boolean
 }
 
 const questions = [
@@ -37,7 +38,8 @@ export default function CompactFeedbackBot({
   welcomeMessage = "Hi there! I'd like to ask you a few quick questions to get your feedback.",
   completionMessage = "Thank you for your feedback! Your responses have been recorded.",
   position = "bottom-right",
-  open = false
+  open = false,
+  popupDisplay = true
 }: CompactFeedbackBotProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   useEffect(() => {
@@ -60,7 +62,8 @@ export default function CompactFeedbackBot({
     "bottom-left": "bottom-4 left-4",
     "top-right": "top-4 right-4",
     "top-left": "top-4 left-4",
-  }
+    center: "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+    }
 
   // Initialize chat when expanded for the first time
   useEffect(() => {
@@ -189,7 +192,7 @@ export default function CompactFeedbackBot({
   return (
     <div className={`fixed ${positionClasses[position]} z-50`}>
       {/* Compact Button */}
-      {!isExpanded && (
+      { popupDisplay && !isExpanded && (
         <button
           onClick={toggleExpanded}
           className="bg-purple-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-purple-700 transition-all"
