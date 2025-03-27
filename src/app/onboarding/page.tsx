@@ -138,7 +138,7 @@ export default function Onboarding() {
       })
       
     } catch (error) {
-      console.error('Error saving onboarding data:', error)
+      console.log('Error saving onboarding data:', error)
       
       // Show error message
       Swal.fire({

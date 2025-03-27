@@ -113,12 +113,13 @@ async function updateLoginTime(uid: string) {
     }
     return true;
   } catch (error) {
-    console.error('Error: ', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to update login time'
-    });
+    console.log('Error: ', error);
+    localStorage.setItem("onboard", "false")
+    //Swal.fire({
+    //  icon: 'error',
+    //  title: 'Error',
+    //  text: 'Failed to update login time'
+    //});
     return false;
   }
 }

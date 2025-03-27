@@ -61,10 +61,10 @@ function DashboardContent() {
           setUserFromDB(response.data)
         }
         else{
-          console.error("Failed to fetch user")
+          console.log("Failed to fetch user")
         }
       } catch (error) {
-        console.error("Error fetching user:", error)
+        console.log("Error fetching user:", error)
       }
     }
     if(user){
@@ -94,7 +94,7 @@ function DashboardContent() {
       //console.log(data)
       //setLeads(data.potential_leads)
     } catch (error) {
-      console.error("Error fetching leads:", error)
+      console.log("Error fetching leads:", error)
       setLeads([])
     }
   }
@@ -111,7 +111,7 @@ function DashboardContent() {
         }
       }
     } catch (error) {
-      console.error("Error checking feedback:", error)
+      console.log("Error checking feedback:", error)
     }
   }
 
@@ -131,8 +131,8 @@ function DashboardContent() {
   }, [hasFeedback, campaigns])
 
   useEffect(() => {
-    console.log("askForFeedback", askForFeedback)
-    MySwal.fire({
+    if(askForFeedback){
+    /*MySwal.fire({
       html: <FeedbackBot popupDisplay={false} position="center" botName="FeedbackAssistant" open={true} onComplete={handleComplete} />,
       showConfirmButton: false,
       showCancelButton: false,
@@ -142,7 +142,10 @@ function DashboardContent() {
       customClass: {
         popup: 'rounded-lg shadow-xl',
       }
-    })
+    })*/
+
+      
+    }
   }, [askForFeedback])
 
   const questions = [
@@ -194,6 +197,10 @@ function DashboardContent() {
     })
     .then((result:any) => {
       fetchLeads()
+      //make the feedback bot appear
+      if (!hasFeedback && campaigns.length > 0) {
+        setAskForFeedback(true)
+      }
     })
     }
   }
@@ -204,7 +211,7 @@ function DashboardContent() {
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
-      console.error("Error fetching campaign details:", error)
+      console.log("Error fetching campaign details:", error)
     }
   }
 
@@ -218,7 +225,7 @@ function DashboardContent() {
         router.push("/")
       }
     } catch (error) {
-      console.error("Error signing out from Frank:", error)
+      console.log("Error signing out from Frank:", error)
     }
   }
 
@@ -302,10 +309,10 @@ function DashboardContent() {
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0)}</span>
+              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0) || userFromDB?.name?.charAt(0).toUpperCase()}</span>
             </div>
             <div>
-              <p className="font-medium text-sm">{user?.displayName}</p>
+              <p className="font-medium text-sm">{user?.displayName || userFromDB?.name}</p>
               <p className="text-xs text-gray-500">{userFromDB?.plan}</p>
             </div>
             <div>
@@ -322,11 +329,9 @@ function DashboardContent() {
           {/* Welcome Banner */}
           <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl font-bold mb-1">
-              {user ? `Welcome Back, ${user.displayName}!` : "Loading..."}
             </h1>
+              {user ? `Welcome Back, ${user?.displayName || userFromDB?.name} !` : "Loading..."}
           </div>
-
-          {/* Action Buttons */}
 
           {/* Lead Activity Feed */}
           <div className="bg-white rounded-lg p-4 sm:p-6 mb-8 overflow-hidden">
