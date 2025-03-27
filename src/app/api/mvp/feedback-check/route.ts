@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
   try {
     const FeedbackModel = mongoose.models.Feedback || mongoose.model('Feedback', FeedbackSchema)
     const feedback = await FeedbackModel.find({ uid })
-    return NextResponse.json({ hasFeedback: !!feedback })
+    if(feedback.length === 0){
+      return NextResponse.json({ hasFeedback: false })
+    }
+    return NextResponse.json({ hasFeedback: true })
   } catch(error: any){
     return NextResponse.json({ message: "Failed to check feedback", error: error.message }, { status: 500 })
   }

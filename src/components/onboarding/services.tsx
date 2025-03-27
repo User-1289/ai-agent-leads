@@ -9,6 +9,9 @@ const SERVICE_AREAS = [
   "Mobile Development",
   "UI/UX Design",
   "Graphic Design",
+  "3D Modeling",
+  "Video Editing",
+  "Product Showcase Videos",
   "Content Writing",
   "Digital Marketing",
   "SEO",
@@ -16,7 +19,6 @@ const SERVICE_AREAS = [
   "Data Analysis",
   "Project Management",
   "Business Consulting",
-  "Virtual Assistance",
 ]
 
 interface ServiceAreasProps {

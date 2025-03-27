@@ -39,12 +39,12 @@ export default function SignUp() {
       const user = userCredential.user;
       let saved = await saveToDb(user);
       if (!saved) {
-        console.error("Failed to save user data to database");
+        console.log("Failed to save user data to database");
         // Consider showing an error message to the user
       }
       router.push("/onboarding"); // Redirect to /onboarding after successful sign-up
     } catch (error:any) {
-      console.error(error);
+      console.log(error);
       if(error.code === "auth/email-already-in-use"){
         Swal.fire({
           icon: 'error',
@@ -75,7 +75,7 @@ export default function SignUp() {
       console.log(user)
       let saved = await saveToDb(user)
       if (!saved) {
-        console.error("Failed to save user data to database")
+        console.log("Failed to save user data to database")
         Swal.fire({
           icon: 'error',
           title: 'Already exists',
@@ -85,7 +85,7 @@ export default function SignUp() {
       }
       router.push("/onboarding") // Redirect to /onboarding after successful sign-up
     } catch (error) {
-      console.error(error)
+      console.log(error)
     }
   }
 
@@ -112,7 +112,7 @@ export default function SignUp() {
       
       return true;
     } catch (error) {
-      console.error('Error saving user to database:', error);
+      console.log('Error saving user to database:', error);
       return false;
     }
   }

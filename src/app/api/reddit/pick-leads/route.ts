@@ -8,9 +8,8 @@ import { z } from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { cookies } from "next/headers";
 import  AutoIncrementFactory from 'mongoose-sequence';
-
-
-const openai = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
+import { removeDuplicatesByPostUrl } from "@/lib/reddit/pick-leads/algos";
+ const openai = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
 const PostUrlSchema = z.object({
   posts: z.array(
     z.object({
@@ -20,8 +19,8 @@ const PostUrlSchema = z.object({
   ),
 });
 
-const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev"]
 
+const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev"]
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const skills = searchParams.get('skills') || '';
@@ -36,7 +35,8 @@ export async function GET(request: NextRequest) {
     userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
     clientId: process.env.REDDIT_APP_ID,
     clientSecret: process.env.REDDIT_APP_SECRET,
-    accessToken:cookieStore.get('reddit_access_token')?.value
+    //accessToken:cookieStore.get('reddit_access_token')?.value
+    refreshToken: cookieStore.get('reddit_refresh_token')?.value
   })
   //if (!uid) {
   //  return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
@@ -46,22 +46,62 @@ export async function GET(request: NextRequest) {
   //  return NextResponse.json({ error: 'Missing query parameter' }, { status: 400 });
   //}
 
-  //if (!skills || !services) {
-  //  return NextResponse.json({ error: 'Missing skills or services parameter' }, { status: 400 });
-  //}  
+  if (!skills && !services) {
+    return NextResponse.json({ error: 'Missing skills or services parameter' }, { status: 400 });
+  }  
 
-   // console.log(skills);  
-   // return NextResponse.json({skills:skills}, {status:200});
-      // Connect to MongoDB
-      
+//check if the access token is valid, if not create a new one with the refresh token
+/*try {
+  // Try a simple API call to validate the token
+  await r.getMe().name;
+} catch (error) {
+  console.log("Access token invalid or expired, refreshing...");
+  
+  const refreshToken = cookieStore.get('reddit_refresh_token')?.value;
+  
+  if (!refreshToken) {
+    return NextResponse.json({ error: 'No refresh token available, please authenticate again' }, { status: 401 });
+  }
+  
   try {
-    // Perform search in the given subreddit
-    //const searchResults = await r.getSubreddit("freelance_forhire").search({
-    //  query:`${skills}`,
-    //  sort: 'relevance',
-    //  limit:50
-    //});
-    //search from all subreddits on a loop
+    // Get new access token using refresh token
+    const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_APP_SECRET}`).toString('base64')}`
+      },
+      body: new URLSearchParams({
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to refresh token');
+    }
+    
+    // Update access token in cookies
+    cookieStore.set('reddit_access_token', data.access_token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 3600, // 1 hour expiration
+      path: '/',
+      sameSite: 'lax'
+    });
+    
+    // Update snoowrap instance with new token
+    r.accessToken = data.access_token;
+    
+    console.log("Access token refreshed successfully");
+  } catch (refreshError) {
+    console.error("Error refreshing token:", refreshError);
+    return NextResponse.json({ error: 'Failed to refresh access token' }, { status: 401 });
+  }
+}  */
+  try {
     const searchResults = [];
     for (const sub of freelanceSubs) {
       const results = await r.getSubreddit(sub).search({
@@ -149,9 +189,11 @@ export async function GET(request: NextRequest) {
 
     //loop through the results and take one element and loop through the jsonMatch and check if the post_url matches, if it does then add the match index to finalResults
     const parsedMatch = JSON.parse(jsonMatch);
-    
+
+    //loop through parsedMatch just to remove the posts which have the same post_url
+    let uniquePosts = removeDuplicatesByPostUrl(parsedMatch);
     const finalResults:any = [];
-    JSON.parse(jsonMatch).posts.forEach((post:any) => {
+    uniquePosts.forEach((post:any) => {
       results.forEach((result:any) => {
         if (result.url === post.post_url) {
           finalResults.push({...result, match_reason: post.match_reason});
@@ -198,10 +240,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Leads saved successfully", leads: finalResults, skills:skills, services:services }, { status: 200 });
     } catch (error) {
       console.error('Error saving leads:', error);
-      return NextResponse.json({ error: 'Failed to save leads', errorMsg:error }, { status: 500 });
+      return NextResponse.json({ message: 'Failed to save leads', error:error }, { status: 500 });
     }
   } catch (error) {
     console.error('Error searching posts:', error);
-    return NextResponse.json({ error: 'Failed to fetch search results',  }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch search results', error:error }, { status: 500 });
   }
 }

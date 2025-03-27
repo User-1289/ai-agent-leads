@@ -29,10 +29,10 @@ export default function Onboarding() {
   }>({
     fullName: "",
     professionalTitle: "",
-    portfolioUrl: "https://",
-    linkedinUrl: "https://linkedin.com/in/",
-    githubUrl: "https://github.com/",
-    xUrl: "https://x.com/",
+    portfolioUrl: "",
+    linkedinUrl: "",
+    githubUrl: "",
+    xUrl: "",
     skills: [],
     serviceAreas: [],
     platforms: [],
@@ -138,7 +138,7 @@ export default function Onboarding() {
       })
       
     } catch (error) {
-      console.error('Error saving onboarding data:', error)
+      console.log('Error saving onboarding data:', error)
       
       // Show error message
       Swal.fire({

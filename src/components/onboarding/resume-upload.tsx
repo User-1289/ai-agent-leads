@@ -75,7 +75,7 @@ export default function ResumeUploader({ skillsExtracted }: { skillsExtracted: (
 
       setUploadStatus("success")
     } catch (error) {
-      console.error("Upload error:", error)
+      console.log("Upload error:", error)
       setUploadStatus("error")
       setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred")
     } finally {

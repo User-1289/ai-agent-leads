@@ -19,7 +19,7 @@ export default function Sidebar() {
         <div className="w-6 h-6 bg-purple-600 rounded-sm flex items-center justify-center">
           <span className="text-white text-sm font-bold">U</span>
         </div>
-        <span className="font-bold text-lg">LeadSurge</span>
+        <span className="font-bold text-lg">FrankLeads</span>
       </div>
       <nav className="space-y-1">
         {navItems.map((item) => {

@@ -50,7 +50,8 @@ export default function BasicInfo({ data, updateData, onNext }: BasicInfoProps) 
           />
         </div>
 
-        <div className="space-y-2">
+        {/*
+          <div className="space-y-2">
           <Label htmlFor="resumeUrl">Resume</Label>
           <Input
             id="resumeUrl"
@@ -99,6 +100,7 @@ export default function BasicInfo({ data, updateData, onNext }: BasicInfoProps) 
             onChange={(e) => updateData({ githubUrl: e.target.value })}
           />
         </div>
+        */}
       </div>
 
       <div className="flex justify-end">

@@ -61,10 +61,10 @@ function DashboardContent() {
           setUserFromDB(response.data)
         }
         else{
-          console.error("Failed to fetch user")
+          console.log("Failed to fetch user")
         }
       } catch (error) {
-        console.error("Error fetching user:", error)
+        console.log("Error fetching user:", error)
       }
     }
     if(user){
@@ -94,7 +94,7 @@ function DashboardContent() {
       //console.log(data)
       //setLeads(data.potential_leads)
     } catch (error) {
-      console.error("Error fetching leads:", error)
+      console.log("Error fetching leads:", error)
       setLeads([])
     }
   }
@@ -111,7 +111,7 @@ function DashboardContent() {
         }
       }
     } catch (error) {
-      console.error("Error checking feedback:", error)
+      console.log("Error checking feedback:", error)
     }
   }
 
@@ -131,7 +131,21 @@ function DashboardContent() {
   }, [hasFeedback, campaigns])
 
   useEffect(() => {
-    console.log("askForFeedback", askForFeedback)
+    if(askForFeedback){
+    /*MySwal.fire({
+      html: <FeedbackBot popupDisplay={false} position="center" botName="FeedbackAssistant" open={true} onComplete={handleComplete} />,
+      showConfirmButton: false,
+      showCancelButton: false,
+      background: '#f0f0f0',
+      width: '600px',
+      padding: '0',
+      customClass: {
+        popup: 'rounded-lg shadow-xl',
+      }
+    })*/
+
+      
+    }
   }, [askForFeedback])
 
   const questions = [
@@ -175,14 +189,18 @@ function DashboardContent() {
         showConfirmButton: false,
         showCancelButton: false,
         background: '#f0f0f0',
-      width: '600px',
-      padding: '0',
-      customClass: {
-        popup: 'rounded-lg shadow-xl',
-      }
+        width: '600px',
+        padding: '0',
+        customClass: {
+          popup: 'rounded-lg shadow-xl',
+        }
     })
     .then((result:any) => {
       fetchLeads()
+      //make the feedback bot appear
+      if (!hasFeedback && campaigns.length > 0) {
+        setAskForFeedback(true)
+      }
     })
     }
   }
@@ -193,20 +211,21 @@ function DashboardContent() {
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
-      console.error("Error fetching campaign details:", error)
+      console.log("Error fetching campaign details:", error)
     }
   }
 
   async function signOutFromFrank() {
     try {
       await signOut(auth)
+      localStorage.removeItem("onboard")
       const logoutUser = await axios.get("/api/user/logout")
       if(logoutUser.status === 200){
         console.log("User logged out successfully")
         router.push("/")
       }
     } catch (error) {
-      console.error("Error signing out from Frank:", error)
+      console.log("Error signing out from Frank:", error)
     }
   }
 
@@ -227,7 +246,7 @@ function DashboardContent() {
                        w-64 md:w-1/5 lg:w-1/6 z-30
                        bg-white border-r flex flex-col shadow-lg md:shadow-none`}>
         <div className="p-4 border-b">
-          <h2 className="text-xl font-bold text-purple-600">LeadSurge</h2>
+          <h2 className="text-xl font-bold text-purple-600">FrankLeads</h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
@@ -274,7 +293,7 @@ function DashboardContent() {
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <MessageSquare size={20} />
-                <Link href="/api/reddit/auth">Integrations</Link>
+                <Link href="/api/reddit/check-auth">Integrations</Link>
               </button>
             </li>
             <li>
@@ -290,10 +309,10 @@ function DashboardContent() {
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0)}</span>
+              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0) || userFromDB?.name?.charAt(0).toUpperCase()}</span>
             </div>
             <div>
-              <p className="font-medium text-sm">{user?.displayName}</p>
+              <p className="font-medium text-sm">{user?.displayName || userFromDB?.name}</p>
               <p className="text-xs text-gray-500">{userFromDB?.plan}</p>
             </div>
             <div>
@@ -310,11 +329,9 @@ function DashboardContent() {
           {/* Welcome Banner */}
           <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl font-bold mb-1">
-              {user ? `Welcome Back, ${user.displayName}!` : "Loading..."}
             </h1>
+              {user ? `Welcome Back, ${user?.displayName || userFromDB?.name} !` : "Loading..."}
           </div>
-
-          {/* Action Buttons */}
 
           {/* Lead Activity Feed */}
           <div className="bg-white rounded-lg p-4 sm:p-6 mb-8 overflow-hidden">
