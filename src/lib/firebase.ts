@@ -9,7 +9,7 @@ import exp from "constants";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDVlivXY7N0RCIHn_xVPzRQPN4gdJaCNs8",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "ai-leads-agent.firebaseapp.com",
   projectId: "ai-leads-agent",
   storageBucket: "ai-leads-agent.firebasestorage.app",
