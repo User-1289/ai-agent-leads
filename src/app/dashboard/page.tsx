@@ -309,10 +309,13 @@ function DashboardContent() {
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0) || userFromDB?.name?.charAt(0).toUpperCase()}</span>
+              <span className="text-purple-700 font-semibold">{user?.displayName?.charAt(0) || userFromDB?.name?.charAt(0).toUpperCase() || user?.email.split("@")[0][0].toUpperCase()}</span>
             </div>
             <div>
-              <p className="font-medium text-sm">{user?.displayName || userFromDB?.name}</p>
+              <p className="font-medium text-sm">
+                {(user?.displayName || userFromDB?.name || user?.email.split("@")[0])
+                  ?.replace(/\b\w/g, (char:any) => char.toUpperCase())}
+              </p>
               <p className="text-xs text-gray-500">{userFromDB?.plan}</p>
             </div>
             <div>
@@ -330,8 +333,11 @@ function DashboardContent() {
           <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl font-bold mb-1">
             </h1>
-              {user ? `Welcome Back, ${user?.displayName || userFromDB?.name} !` : "Loading..."}
-          </div>
+            Welcome Back! {" "}
+            
+            {(user?.displayName || userFromDB?.name || user?.email.split("@")[0])
+                  ?.replace(/\b\w/g, (char:any) => char.toUpperCase())}
+            </div>
 
           {/* Lead Activity Feed */}
           <div className="bg-white rounded-lg p-4 sm:p-6 mb-8 overflow-hidden">

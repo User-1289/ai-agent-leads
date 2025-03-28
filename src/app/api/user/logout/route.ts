@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
     //delete the uid from the cookies
     try {
         cookieStore.delete("uid");
+        cookieStore.delete("reddit_access_token");
+        cookieStore.delete("reddit_refresh_token");
+        cookieStore.delete("reddit_state");
         return NextResponse.json({ message: "User logged out successfully" });
     } catch (error: any) {
         return NextResponse.json({ message: "Failed to log out user", error: error.message }, { status: 500 });
