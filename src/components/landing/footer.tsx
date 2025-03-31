@@ -11,26 +11,12 @@ export default function Footer() {
               <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 block">
                 Home
               </Link>
-              <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 block">
+              <Link href="#features" className="text-sm text-gray-600 hover:text-gray-900 block">
                 Features
               </Link>
-              <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 block">
+              <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900 block">
                 Pricing
-              </Link>
-              <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 block">
-                Blog
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="#" className="text-gray-600 hover:text-gray-900">
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-600 hover:text-gray-900">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-600 hover:text-gray-900">
-                <Github className="w-5 h-5" />
-              </Link>
+              </Link> 
             </div>
           </div>
           <div>
@@ -47,7 +33,7 @@ export default function Footer() {
                 Subscribe
               </button>
             </form>
-            <p className="mt-8 text-sm text-gray-500">© 2023 Uizard.io. All rights reserved. Terms & Privacy</p>
+            <p className="mt-8 text-sm text-gray-500">© 2025 FrankLeads. All rights reserved. Terms & Privacy</p>
           </div>
         </div>
       </div>

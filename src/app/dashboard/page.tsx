@@ -351,6 +351,7 @@ function DashboardContent() {
                     <th className="pb-4 px-4 sm:pl-0">Lead Name</th>
                     <th className="pb-4 px-4">Platform</th>
                     <th className="pb-4 px-4">Date Posted</th>
+                    <th className="pb-4 px-4">Generate Message</th>
                     <th className="pb-4 px-4 sm:pr-0">Go to post</th>
                   </tr>
                 </thead>
@@ -365,6 +366,9 @@ function DashboardContent() {
                             <Clock size={14} className="inline-block mr-1" />
                             {new Date(lead.post_created_utc).toISOString().split('T')[0]}
                           </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <button className="">Generate</button>
                         </td>
                         <td className="py-4 px-4 sm:pr-0">
                           <a 

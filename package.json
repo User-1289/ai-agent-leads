@@ -38,6 +38,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
     "@types/mongoose-sequence": "^3.0.11",
     "@types/node": "^20",
     "@types/react": "^19",
