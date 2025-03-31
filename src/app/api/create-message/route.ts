@@ -41,9 +41,10 @@ export async function POST(request: NextRequest) {
         const message = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             messages: [
+                {role:'system', content: 'You are a helpful assistant that creates personalized messages for users to send to potential clients on reddit, that sounds natural and sounds human.'},
                 {
                     role: 'user',
-                    content:`Create me a personalized message to send to this potential client on reddit.
+                    content:`Create me a personalized message to send to this potential client on reddit in private message.
                     Here is the user data: 
                     title: ${userData.title}    
                     name: ${userData.name}
