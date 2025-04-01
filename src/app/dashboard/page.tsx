@@ -236,7 +236,11 @@ function DashboardContent() {
         const data = response.data
         console.log(data)
         if(!data.status){
-          router.push("/api/reddit/auth")
+          const authResponse = await axios.get("/api/reddit/auth")
+          if(authResponse.status === 200){
+            const authUrl = authResponse.data.redirectUrl
+            window.location.href = authUrl
+          }
         }
         else{
           router.push("/dashboard?already_integrated_reddit=true")
