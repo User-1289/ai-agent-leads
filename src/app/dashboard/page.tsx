@@ -229,6 +229,23 @@ function DashboardContent() {
     }
   }
 
+  async function checkIntegration() {
+    try {
+      const response = await axios.get("/api/reddit/check-auth")
+      if(response.status === 200){
+        const data = response.data
+        console.log(data)
+        if(!data.status){
+          router.push("/api/reddit/auth")
+        }
+        else{
+          router.push("/dashboard?already_integrated_reddit=true")
+        }
+      }
+    } catch (error) {
+      console.log("Error checking integration:", error)
+    }
+  }
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
       {/* Mobile Sidebar Toggle */}
@@ -290,20 +307,21 @@ function DashboardContent() {
             </li>
             <li>
             <button
+            onClick={checkIntegration}
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <MessageSquare size={20} />
-                <Link href="/api/reddit/check-auth">Integrations</Link>
+               <span>Integrations</span>
               </button>
             </li>
-            <li>
+            {/*<li>
             <button
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <User size={20} />
                 <Link href="/user/profile">Update Profile</Link>
               </button>
-            </li>
+            </li>*/}
           </ul>
         </nav>
         <div className="p-4 border-t">

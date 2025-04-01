@@ -1,16 +1,15 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-
 export async function GET(request: NextRequest) {
-  // First check if the user is already logged in
+  //first check if the user is already logged in
   let cookieStore = await cookies();
-  // const accessToken = cookieStore.get('reddit_access_token')?.value;
-  // if (accessToken) {
-  //   return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));
-  // }
+  //const accessToken = cookieStore.get('reddit_access_token')?.value;
+  //if(accessToken){
+  //  return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));
+  //}
 
   const CLIENT_ID = process.env.REDDIT_APP_ID;
-  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string || "http://localhost:4000/api/reddit/callback";
+  const REDIRECT_URI = process.env.REDDIT_REDIRECT_URI as string || "http://localhost:4000/api/reddit/callback"
 
   if (!CLIENT_ID || !REDIRECT_URI) {
     return NextResponse.json({ error: "Missing Reddit Client ID or Redirect URI" }, { status: 500 });
@@ -30,11 +29,5 @@ export async function GET(request: NextRequest) {
   // Construct Reddit OAuth URL
   const authUrl = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&duration=permanent&scope=read`;
 
-  // Set CORS headers to allow the request from your client
-  const response = NextResponse.redirect(authUrl);
-  response.headers.set('Access-Control-Allow-Origin', '*'); // Allow any origin, or specify your allowed origin
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Specify allowed HTTP methods
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Specify allowed headers
-
-  return response;
+  return NextResponse.redirect(authUrl);
 }
