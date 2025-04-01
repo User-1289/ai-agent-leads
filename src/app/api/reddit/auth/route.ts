@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/dist/server/api-utils';
 export async function GET(request: NextRequest) {
   //first check if the user is already logged in
   let cookieStore = await cookies();
@@ -29,5 +30,10 @@ export async function GET(request: NextRequest) {
   // Construct Reddit OAuth URL
   const authUrl = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=code&state=${state}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&duration=permanent&scope=read`;
 
-  return NextResponse.redirect(authUrl);
+  return NextResponse.json({
+    status: true,
+    redirectUrl: authUrl,
+    message: "Redirecting to Reddit for authentication"
+  }, { status: 200});
+  
 }
