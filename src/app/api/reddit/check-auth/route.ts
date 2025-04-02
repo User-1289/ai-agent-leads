@@ -5,7 +5,10 @@ export async function GET(request: NextRequest) {
     let cookieStore = await cookies();
     const accessToken = cookieStore.get('reddit_refresh_token')?.value;
     if (!accessToken) {
-        return NextResponse.redirect(new URL('/api/reddit/auth', request.url));
+        //return NextResponse.redirect(new URL('/api/reddit/auth', request.url));
+        return NextResponse.json({ message: "No refresh token found", status:false }, { status: 200 });
     } else {
-        return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));  }
+        //return NextResponse.redirect(new URL('/dashboard?already_integrated_reddit=true', request.url));  
+        return NextResponse.json({ message: "Already integrated", status:true }, { status: 200 });
+    }
 }

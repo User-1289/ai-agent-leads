@@ -29,5 +29,6 @@ export const LeadSchema = new Schema({
         post_subreddit: String,
         platform: String,
         match_reason: String,
+        personalized_message: String,
     }]
 });

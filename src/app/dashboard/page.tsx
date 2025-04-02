@@ -26,6 +26,8 @@ function DashboardContent() {
   const [alreadyIntegratedReddit, setAlreadyIntegratedReddit] = useState(false)
   const [hasFeedback, setHasFeedback] = useState(false)
   const [askForFeedback, setAskForFeedback] = useState(false)
+  const [fetchedSkills, setFetchedSkills] = useState<boolean>(false)
+  const [fetchedFreelanceData, setFetchedFreelanceData] = useState<any>({})
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
@@ -71,17 +73,6 @@ function DashboardContent() {
       fetchUser()
     }
   }, [user])
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3, },
-    { id: "campaign-creation", label: "Create Campaign", icon: BarChart3},
-    { id: "leads", label: "Leads Manager", icon: Users },
-    { id: "outreach", label: "Outreach Automation", icon: Share2 },
-    { id: "integrations", label: "Platform Integrations", icon: MessageSquare },
-    { id: "chatbot", label: "AI Assistant Chatbot", icon: Bot },
-    { id: "settings", label: "Settings", icon: Settings },
-  ]
-
   
   const fetchLeads = async () => {
     try {
@@ -119,6 +110,20 @@ function DashboardContent() {
     checkFeedback()
   }, [campaigns])
 
+  async function fetchFreelancerData() {
+    console.log("Fetching freelance data")
+    let response = await axios.get(`/api/user/freelance-data/retrieve?uid=${user?.uid}`)
+    console.log(response)
+    if (response.status === 200) {
+      setFetchedFreelanceData(response.data)
+      setFetchedSkills(true)
+      return response.data
+    }
+    else {
+      console.log("Error fetching freelance data")
+    }
+  }
+
   useEffect(() => {
     if(!hasFeedback && campaigns && campaigns.length > 0){
       setAskForFeedback(true)
@@ -130,34 +135,10 @@ function DashboardContent() {
     }
   }, [hasFeedback, campaigns])
 
-  useEffect(() => {
-    if(askForFeedback){
-    /*MySwal.fire({
-      html: <FeedbackBot popupDisplay={false} position="center" botName="FeedbackAssistant" open={true} onComplete={handleComplete} />,
-      showConfirmButton: false,
-      showCancelButton: false,
-      background: '#f0f0f0',
-      width: '600px',
-      padding: '0',
-      customClass: {
-        popup: 'rounded-lg shadow-xl',
-      }
-    })*/
 
-      
-    }
-  }, [askForFeedback])
+  useEffect(()=>{
 
-  const questions = [
-    "How would you rate your experience with our service on a scale of 1-10?",
-    "What feature do you find most useful in our platform?",
-    "Is there anything we could improve to better serve your needs?",
-  ]
-
-  const handleComplete = (answers: Record<number, string>) => {
-    console.log("Feedback completed:", answers)
-   // setFeedbackData(answers)
-  }
+  }, [])
 
   useEffect(() => {
 
@@ -229,6 +210,70 @@ function DashboardContent() {
     }
   }
 
+  async function checkIntegration() {
+    try {
+      const response = await axios.get("/api/reddit/check-auth")
+      if(response.status === 200){
+        const data = response.data
+        console.log(data)
+        if(!data.status){
+          router.push("/api/reddit/auth")
+        }
+        else{
+          router.push("/dashboard?already_integrated_reddit=true")
+        }
+      }
+    } catch (error) {
+      console.log("Error checking integration:", error)
+    }
+  }
+
+  useEffect(() => {
+    if(user){
+      fetchFreelancerData()
+    }
+  }, [user])
+  async function generatePersonalizedMsg(lead:any) {
+    console.log("Generating personalized message for lead:", lead)
+    console.log("Freelance data:", fetchedFreelanceData)
+    try {
+      const response = await axios.post("/api/create-message", {
+        post:{
+          post_body: lead.post_body,
+          post_title: lead.post_title,
+          post_author: lead.post_author
+        },
+        userData:{
+          title: fetchedFreelanceData.title,
+          name: fetchedFreelanceData.name,
+          skills: fetchedFreelanceData.skills,
+          services: fetchedFreelanceData.services
+        }
+      })
+      if(response.status === 200){
+        const data = response.data
+        console.log(data)
+        MySwal.fire({
+          title: "Personalized Message",
+          text: data.personalizedMsg,
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonText: "Copy",
+          cancelButtonText: "Close",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(data.personalizedMsg)
+            MySwal.fire("Copied!", "The message has been copied to clipboard.", "success");
+          }
+        })
+      }
+      else{
+        console.log("Error generating personalized message")
+      }
+    } catch (error) {
+      console.log("Error generating personalized message:", error)
+    }
+  }
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
       {/* Mobile Sidebar Toggle */}
@@ -290,20 +335,21 @@ function DashboardContent() {
             </li>
             <li>
             <button
+            onClick={checkIntegration}
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <MessageSquare size={20} />
-                <Link href="/api/reddit/check-auth">Integrations</Link>
+               <span>Integrations</span>
               </button>
             </li>
-            <li>
+            {/*<li>
             <button
                 className="w-full flex items-center space-x-3 p-2 rounded-md transition-colors"
               >
                 <User size={20} />
                 <Link href="/user/profile">Update Profile</Link>
               </button>
-            </li>
+            </li>*/}
           </ul>
         </nav>
         <div className="p-4 border-t">
@@ -368,7 +414,7 @@ function DashboardContent() {
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <button className="">Generate</button>
+                          <button onClick={() => generatePersonalizedMsg(lead)} className="">Generate</button>
                         </td>
                         <td className="py-4 px-4 sm:pr-0">
                           <a 
@@ -406,7 +452,6 @@ function DashboardContent() {
     </div>
   )
 }
-
 export default function Dashboard() {
   return (
       

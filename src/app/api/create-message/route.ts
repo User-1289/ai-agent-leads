@@ -45,6 +45,8 @@ export async function POST(request: NextRequest) {
                 {
                     role: 'user',
                     content:`Create me a personalized message to send to this potential client on reddit in private message.
+                    It should be a friendly message that sounds human and natural and should not be like an email with a subject line and a signature.
+                    The message should be short and to the point, and should not be too long.
                     Here is the user data: 
                     title: ${userData.title}    
                     name: ${userData.name}
@@ -63,6 +65,7 @@ export async function POST(request: NextRequest) {
         const messageText = message.choices[0].message.content;
         return NextResponse.json({ personalizedMsg: messageText, message:'successfull' }, { status: 200 });
     } catch (error) {
+        console.log(error)
         return NextResponse.json({ message: 'Error creating message', error:error }, { status: 500 });``
     }
 }

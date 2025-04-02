@@ -20,7 +20,7 @@ const PostUrlSchema = z.object({
 });
 
 
-const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev", ]
+const freelanceSubs = ["forhire", "hiring", "jobbit", "freelance_forhire", "FreelanceProgramming", "AppDevelopers", "appdev", "SideProjects", "SaaS"]
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const skills = searchParams.get('skills') || '';
