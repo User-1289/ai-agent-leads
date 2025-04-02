@@ -31,6 +31,19 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const uid = cookieStore.get('uid')?.value
 
+  if (!uid) {
+    return NextResponse.json({ error: 'Missing uid' }, { status: 400 });
+  }
+  if (!campaign_name) {
+    return NextResponse.json({ error: 'Missing campaign_name' }, { status: 400 });
+  }
+
+  let redditRefreshToken = cookieStore.get('reddit_refresh_token')?.value;
+  console.log("redditRefreshToken", redditRefreshToken);
+  if (!redditRefreshToken) {
+    return NextResponse.json({ message: 'Missing reddit_refresh_token', error:'reddit_token_not_found' }, { status: 400 });
+  }
+
   const r = new snoowrap({
     userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
     clientId: process.env.REDDIT_APP_ID,

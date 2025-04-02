@@ -86,7 +86,16 @@ export default function CampaignCreator() {
       })
       
       if(res.status !== 200) {
-        throw new Error(`Failed to fetch leads: ${res.data.error}`)
+      //  if(res.status===400 && res.data.error === 'reddit_token_not_found') {
+      //    console.log('reddit_token_not_found')
+      //    Swal.fire({
+      //      title: 'Error',
+      //      text: 'Reddit token not found. Please authenticate with Reddit by clicking on Integrations > Reddit',
+      //      icon: 'error'
+      //    })
+      //    return
+      //  }
+      throw new Error(`Failed to fetch leads: ${res.data.error}`)
       }
         Swal.fire({
           title: 'Success',
@@ -98,11 +107,23 @@ export default function CampaignCreator() {
 
     } catch (error:any) {
       setIsLoading(false)
-      Swal.fire({
-        title: 'Error',
-        text: error.message,
-        icon: 'error'
-      })
+      console.log(error.response.data)
+      console.log(error.status)
+      if(error.status===400 && error.response.data.error === 'reddit_token_not_found') {
+        console.log('reddit_token_not_found')
+        Swal.fire({
+          title: 'Error',
+          text: 'Reddit token not found. Please authenticate with Reddit by clicking on Integrations > Reddit',
+          icon: 'error'
+        })
+        return
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: error.message,
+          icon: 'error'
+        })
+      }
     }
   } 
 
