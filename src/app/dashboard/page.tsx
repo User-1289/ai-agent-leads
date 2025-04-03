@@ -15,6 +15,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter, useSearchParams } from "next/navigation"
 import FeedbackBot from "@/components/analytics/FeedbackBot"
+import { set } from "mongoose"
 function DashboardContent() {
   const MySwal = withReactContent(Swal);  
   const [selectedNav, setSelectedNav] = useState("dashboard")
@@ -26,6 +27,9 @@ function DashboardContent() {
   const [alreadyIntegratedReddit, setAlreadyIntegratedReddit] = useState(false)
   const [hasFeedback, setHasFeedback] = useState(false)
   const [askForFeedback, setAskForFeedback] = useState(false)
+  const [fetchedSkills, setFetchedSkills] = useState<boolean>(false)
+  const [fetchedFreelanceData, setFetchedFreelanceData] = useState<any>({})
+  const [currCampaignId, setCurrCampaignId] = useState<string>("")
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
@@ -71,17 +75,6 @@ function DashboardContent() {
       fetchUser()
     }
   }, [user])
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3, },
-    { id: "campaign-creation", label: "Create Campaign", icon: BarChart3},
-    { id: "leads", label: "Leads Manager", icon: Users },
-    { id: "outreach", label: "Outreach Automation", icon: Share2 },
-    { id: "integrations", label: "Platform Integrations", icon: MessageSquare },
-    { id: "chatbot", label: "AI Assistant Chatbot", icon: Bot },
-    { id: "settings", label: "Settings", icon: Settings },
-  ]
-
   
   const fetchLeads = async () => {
     try {
@@ -119,6 +112,20 @@ function DashboardContent() {
     checkFeedback()
   }, [campaigns])
 
+  async function fetchFreelancerData() {
+    console.log("Fetching freelance data")
+    let response = await axios.get(`/api/user/freelance-data/retrieve?uid=${user?.uid}`)
+    console.log(response)
+    if (response.status === 200) {
+      setFetchedFreelanceData(response.data)
+      setFetchedSkills(true)
+      return response.data
+    }
+    else {
+      console.log("Error fetching freelance data")
+    }
+  }
+
   useEffect(() => {
     if(!hasFeedback && campaigns && campaigns.length > 0){
       setAskForFeedback(true)
@@ -130,34 +137,10 @@ function DashboardContent() {
     }
   }, [hasFeedback, campaigns])
 
-  useEffect(() => {
-    if(askForFeedback){
-    /*MySwal.fire({
-      html: <FeedbackBot popupDisplay={false} position="center" botName="FeedbackAssistant" open={true} onComplete={handleComplete} />,
-      showConfirmButton: false,
-      showCancelButton: false,
-      background: '#f0f0f0',
-      width: '600px',
-      padding: '0',
-      customClass: {
-        popup: 'rounded-lg shadow-xl',
-      }
-    })*/
 
-      
-    }
-  }, [askForFeedback])
+  useEffect(()=>{
 
-  const questions = [
-    "How would you rate your experience with our service on a scale of 1-10?",
-    "What feature do you find most useful in our platform?",
-    "Is there anything we could improve to better serve your needs?",
-  ]
-
-  const handleComplete = (answers: Record<number, string>) => {
-    console.log("Feedback completed:", answers)
-   // setFeedbackData(answers)
-  }
+  }, [])
 
   useEffect(() => {
 
@@ -208,6 +191,7 @@ function DashboardContent() {
   async function handleCampaignDetails(campaign_id: string) {
     try {
       const { data } = await axios.get(`/api/campaigns/retrieve?campaign_id=${campaign_id}`)
+      setCurrCampaignId(campaign_id)
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
@@ -249,6 +233,95 @@ function DashboardContent() {
     } catch (error) {
       console.log("Error checking integration:", error)
     }
+  }
+
+  useEffect(() => {
+    if(user){
+      fetchFreelancerData()
+    }
+  }, [user])
+  async function generatePersonalizedMsg(isGenerated:boolean, lead:any) {
+    if(isGenerated){
+      MySwal.fire({
+        title: "Personalized Message",
+        text: lead.personalized_message,
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonText: "Copy",
+        cancelButtonText: "Close",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigator.clipboard.writeText(lead.personalized_message)
+         // MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
+        }
+      })
+      return
+    }
+    if(!isGenerated){
+      //block other buttons
+      MySwal.fire({
+        title: "Generating Personalized Message",
+        text: "Please wait while we generate your personalized message",
+        icon: "info",
+        showCancelButton: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          MySwal.showLoading()
+        }
+      })
+    try {
+      const response = await axios.post(`/api/create-message?campaign_id=${currCampaignId}`, {
+        post:{
+          post_body: lead.post_body,
+          post_title: lead.post_title,
+          post_author: lead.post_author,
+          post_url: lead.post_url,
+        },
+        userData:{
+          title: fetchedFreelanceData.title,
+          name: fetchedFreelanceData.name,
+          skills: fetchedFreelanceData.skills,
+          services: fetchedFreelanceData.services
+        }
+      })
+      if(response.status === 200){
+        const data = response.data
+        console.log(data)
+        MySwal.fire({
+          title: "Personalized Message",
+          text: data.personalizedMsg,
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonText: "Copy",
+          cancelButtonText: "Close",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(data.personalizedMsg)
+         //   MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
+          }
+        })
+        //make the button green
+        setLeads((prevLeads:any) => {
+          return prevLeads.map((lead:any) => {
+            if (lead.post_url === data.post_url) {
+              return {
+                ...lead,
+                personalized_message: data.personalizedMsg,
+              }
+            }
+            return lead
+          })
+        }
+        )
+      }
+      else{
+        console.log("Error generating personalized message")
+      }
+    } catch (error) {
+      console.log("Error generating personalized message:", error)
+    }
+  }
   }
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
@@ -316,7 +389,7 @@ function DashboardContent() {
               >
                 <MessageSquare size={20} />
                <span>Integrations</span>
-              </button>
+            </button>
             </li>
             {/*<li>
             <button
@@ -373,6 +446,7 @@ function DashboardContent() {
                     <th className="pb-4 px-4 sm:pl-0">Lead Name</th>
                     <th className="pb-4 px-4">Platform</th>
                     <th className="pb-4 px-4">Date Posted</th>
+                    <th className="pb-4 px-4">Personalized Message</th>
                     <th className="pb-4 px-4 sm:pr-0">Go to post</th>
                   </tr>
                 </thead>
@@ -387,6 +461,14 @@ function DashboardContent() {
                             <Clock size={14} className="inline-block mr-1" />
                             {new Date(lead.post_created_utc).toISOString().split('T')[0]}
                           </span>
+                        </td>
+                        <td className="py-4 px-4">
+                        <button 
+                        className={`bg-purple-600 text-white px-4 py-2 rounded-md ${lead.personalized_message ? "bg-green-600" : "bg-purple-600"}`}
+                        onClick={() => generatePersonalizedMsg(lead.personalized_message ? true : false, lead)}
+                          >
+                          {lead.personalized_message ? "Generated" : "Generate"}
+                        </button>                        
                         </td>
                         <td className="py-4 px-4 sm:pr-0">
                           <a 
@@ -424,7 +506,6 @@ function DashboardContent() {
     </div>
   )
 }
-
 export default function Dashboard() {
   return (
       
