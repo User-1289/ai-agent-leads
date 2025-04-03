@@ -15,6 +15,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter, useSearchParams } from "next/navigation"
 import FeedbackBot from "@/components/analytics/FeedbackBot"
+import { set } from "mongoose"
 function DashboardContent() {
   const MySwal = withReactContent(Swal);  
   const [selectedNav, setSelectedNav] = useState("dashboard")
@@ -28,6 +29,7 @@ function DashboardContent() {
   const [askForFeedback, setAskForFeedback] = useState(false)
   const [fetchedSkills, setFetchedSkills] = useState<boolean>(false)
   const [fetchedFreelanceData, setFetchedFreelanceData] = useState<any>({})
+  const [currCampaignId, setCurrCampaignId] = useState<string>("")
   const url = useSearchParams()
   const router = useRouter()
   useEffect(() => {
@@ -189,6 +191,7 @@ function DashboardContent() {
   async function handleCampaignDetails(campaign_id: string) {
     try {
       const { data } = await axios.get(`/api/campaigns/retrieve?campaign_id=${campaign_id}`)
+      setCurrCampaignId(campaign_id)
       console.log(data)
       setLeads(data.campaign.potential_leads)
     } catch (error) {
@@ -233,15 +236,31 @@ function DashboardContent() {
       fetchFreelancerData()
     }
   }, [user])
-  async function generatePersonalizedMsg(lead:any) {
-    console.log("Generating personalized message for lead:", lead)
-    console.log("Freelance data:", fetchedFreelanceData)
+  async function generatePersonalizedMsg(isGenerated:boolean, lead:any) {
+    if(isGenerated){
+      MySwal.fire({
+        title: "Personalized Message",
+        text: lead.personalized_message,
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonText: "Copy",
+        cancelButtonText: "Close",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigator.clipboard.writeText(lead.personalized_message)
+          MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
+        }
+      })
+      return
+    }
+    if(!isGenerated){
     try {
-      const response = await axios.post("/api/create-message", {
+      const response = await axios.post(`/api/create-message?campaign_id=${currCampaignId}`, {
         post:{
           post_body: lead.post_body,
           post_title: lead.post_title,
-          post_author: lead.post_author
+          post_author: lead.post_author,
+          post_url: lead.post_url,
         },
         userData:{
           title: fetchedFreelanceData.title,
@@ -263,9 +282,22 @@ function DashboardContent() {
         }).then((result) => {
           if (result.isConfirmed) {
             navigator.clipboard.writeText(data.personalizedMsg)
-            MySwal.fire("Copied!", "The message has been copied to clipboard.", "success");
+            MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
           }
         })
+        //make the button green
+        setLeads((prevLeads:any) => {
+          return prevLeads.map((lead:any) => {
+            if (lead.post_url === data.post_url) {
+              return {
+                ...lead,
+                personalized_message: data.personalizedMsg,
+              }
+            }
+            return lead
+          })
+        }
+        )
       }
       else{
         console.log("Error generating personalized message")
@@ -273,6 +305,7 @@ function DashboardContent() {
     } catch (error) {
       console.log("Error generating personalized message:", error)
     }
+  }
   }
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 relative">
@@ -340,7 +373,7 @@ function DashboardContent() {
               >
                 <MessageSquare size={20} />
                <span>Integrations</span>
-              </button>
+            </button>
             </li>
             {/*<li>
             <button
@@ -397,7 +430,7 @@ function DashboardContent() {
                     <th className="pb-4 px-4 sm:pl-0">Lead Name</th>
                     <th className="pb-4 px-4">Platform</th>
                     <th className="pb-4 px-4">Date Posted</th>
-                    <th className="pb-4 px-4">Generate Message</th>
+                    <th className="pb-4 px-4">Personalized Message</th>
                     <th className="pb-4 px-4 sm:pr-0">Go to post</th>
                   </tr>
                 </thead>
@@ -414,7 +447,12 @@ function DashboardContent() {
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <button onClick={() => generatePersonalizedMsg(lead)} className="">Generate</button>
+                        <button 
+                        className={`bg-purple-600 text-white px-4 py-2 rounded-md ${lead.personalized_message ? "bg-green-600" : "bg-purple-600"}`}
+                        onClick={() => generatePersonalizedMsg(lead.personalized_message ? true : false, lead)}
+                          >
+                          {lead.personalized_message ? "Generated" : "Generate"}
+                        </button>                        
                         </td>
                         <td className="py-4 px-4 sm:pr-0">
                           <a 

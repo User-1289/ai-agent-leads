@@ -2,6 +2,7 @@ import { RedditPost as type } from "@/lib/types/Posts";
 import OpenAI from "openai";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: NextRequest) {
@@ -15,6 +16,11 @@ export async function POST(request: NextRequest) {
     }
     if (!uid) {
         return NextResponse.json({ message:'Unathorized', error:'Mate, why trying to call our api unauthorized' }, { status: 400 });
+    }
+
+    let campaignId = searchParams.get('campaign_id') as string;
+    if (!campaignId) {
+        return NextResponse.json({ error: 'Missing campaign_id parameter' }, { status: 400 });
     }
 
     let body;
@@ -63,7 +69,17 @@ export async function POST(request: NextRequest) {
             ]
         });
         const messageText = message.choices[0].message.content;
-        return NextResponse.json({ personalizedMsg: messageText, message:'successfull' }, { status: 200 });
+
+        //call /api/messages/save with the personalized message and the post url
+        try {
+            const saveMsg = await axios.post(`${request.nextUrl.origin}/api/messages/save?campaign_id=${campaignId}&post_url=${post.post_url}`, {
+                personalized_message: messageText,
+            })
+            return NextResponse.json({ message: 'Message saved successfully', personalizedMsg:messageText, post_url:post.post_url }, { status: 200 });
+        } catch (error) {
+            console.log('Error saving message:', error);
+            return NextResponse.json({ message: 'Error saving message',  error:error }, { status: 500 });
+        }
     } catch (error) {
         console.log(error)
         return NextResponse.json({ message: 'Error creating message', error:error }, { status: 500 });``

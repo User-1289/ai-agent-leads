@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
     */
     // Check if the request has a valid JSON body
     let body = await request.json()
-    //if (!body) {
-    //    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-    //}
+    if (!body) {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
 
     let campaignId = searchParams.get('campaign_id') as string;
     let postUrl = searchParams.get('post_url') as string;
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
         if(lead.potential_leads[i].post_url === postUrl) {
             // Add the personalized message
             cleanObject.personalized_message = message;
+
         }
         
         finalLeads.push(cleanObject);
