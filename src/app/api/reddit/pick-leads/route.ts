@@ -31,6 +31,19 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const uid = cookieStore.get('uid')?.value
 
+  if (!uid) {
+    return NextResponse.json({ error: 'Missing uid' }, { status: 400 });
+  }
+  if (!campaign_name) {
+    return NextResponse.json({ error: 'Missing campaign_name' }, { status: 400 });
+  }
+
+  let redditRefreshToken = cookieStore.get('reddit_refresh_token')?.value;
+  console.log("redditRefreshToken", redditRefreshToken);
+  if (!redditRefreshToken) {
+    return NextResponse.json({ message: 'Missing reddit_refresh_token', error:'reddit_token_not_found' }, { status: 400 });
+  }
+
   const r = new snoowrap({
     userAgent: 'NODEJS:myapp:v1.0.0 (by /u/armaan-dev)',
     clientId: process.env.REDDIT_APP_ID,
@@ -38,75 +51,17 @@ export async function GET(request: NextRequest) {
     //accessToken:cookieStore.get('reddit_access_token')?.value
     refreshToken: cookieStore.get('reddit_refresh_token')?.value
   })
-  //if (!uid) {
-  //  return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
-  //}
-
-  //if (!query) {
-  //  return NextResponse.json({ error: 'Missing query parameter' }, { status: 400 });
-  //}
 
   if (!skills && !services) {
     return NextResponse.json({ error: 'Missing skills or services parameter' }, { status: 400 });
   }  
 
-//check if the access token is valid, if not create a new one with the refresh token
-/*try {
-  // Try a simple API call to validate the token
-  await r.getMe().name;
-} catch (error) {
-  console.log("Access token invalid or expired, refreshing...");
-  
-  const refreshToken = cookieStore.get('reddit_refresh_token')?.value;
-  
-  if (!refreshToken) {
-    return NextResponse.json({ error: 'No refresh token available, please authenticate again' }, { status: 401 });
-  }
-  
-  try {
-    // Get new access token using refresh token
-    const response = await fetch('https://www.reddit.com/api/v1/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${process.env.REDDIT_APP_ID}:${process.env.REDDIT_APP_SECRET}`).toString('base64')}`
-      },
-      body: new URLSearchParams({
-        'grant_type': 'refresh_token',
-        'refresh_token': refreshToken
-      })
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to refresh token');
-    }
-    
-    // Update access token in cookies
-    cookieStore.set('reddit_access_token', data.access_token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 3600, // 1 hour expiration
-      path: '/',
-      sameSite: 'lax'
-    });
-    
-    // Update snoowrap instance with new token
-    r.accessToken = data.access_token;
-    
-    console.log("Access token refreshed successfully");
-  } catch (refreshError) {
-    console.error("Error refreshing token:", refreshError);
-    return NextResponse.json({ error: 'Failed to refresh access token' }, { status: 401 });
-  }
-}  */
   try {
     const searchResults = [];
     for (const sub of freelanceSubs) {
       const results = await r.getSubreddit(sub).search({
         
-        query: `[HIRING] ${skills} ${services}`,
+        query: `${skills} ${services}`,
         sort: 'relevance',
       });
      // console.log(results);
