@@ -248,12 +248,24 @@ function DashboardContent() {
       }).then((result) => {
         if (result.isConfirmed) {
           navigator.clipboard.writeText(lead.personalized_message)
-          MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
+         // MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
         }
       })
       return
     }
     if(!isGenerated){
+      //block other buttons
+      MySwal.fire({
+        title: "Generating Personalized Message",
+        text: "Please wait while we generate your personalized message",
+        icon: "info",
+        showCancelButton: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          MySwal.showLoading()
+        }
+      })
     try {
       const response = await axios.post(`/api/create-message?campaign_id=${currCampaignId}`, {
         post:{
@@ -282,7 +294,7 @@ function DashboardContent() {
         }).then((result) => {
           if (result.isConfirmed) {
             navigator.clipboard.writeText(data.personalizedMsg)
-            MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
+         //   MySwal.fire({ title:"Copied!", text:"The message has been copied to clipboard.", icon:"success", timer: 1000, showConfirmButton: false });
           }
         })
         //make the button green
