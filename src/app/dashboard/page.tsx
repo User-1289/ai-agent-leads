@@ -464,7 +464,7 @@ function DashboardContent() {
                         </td>
                         <td className="py-4 px-4">
                         <button 
-                        className={`bg-purple-600 text-white px-4 py-2 rounded-md ${lead.personalized_message ? "bg-green-600" : "bg-purple-600"}`}
+                        className={`text-white px-4 py-2 rounded-md ${lead.personalized_message ? "bg-green-600" : "bg-purple-600"}`}
                         onClick={() => generatePersonalizedMsg(lead.personalized_message ? true : false, lead)}
                           >
                           {lead.personalized_message ? "Generated" : "Generate"}
