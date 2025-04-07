@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { UserSchema } from "@/lib/schemas/UserSchema";
 import { cookies } from "next/headers";
-
+import nodemailer from "nodemailer";
 export async function POST(request:NextRequest){
     const body = await request.json()
     const {email, name, uid, createdAt, isEmailVerified, signedIn, plan} = body
@@ -37,9 +37,36 @@ export async function POST(request:NextRequest){
             secure: process.env.NODE_ENV === 'production',
             sameSite:'strict'
         })
+        let sendMsg = await sendEmailToFounder(email)
         return NextResponse.json({ success: true }, { status: 201 })
     } catch (error:any) {
         console.error(error)
         return NextResponse.json({error: error.message}, {status: 500})
     }
+}
+
+async function sendEmailToFounder(userEmail: string) {
+    const founderEmail = process.env.FOUNDER_EMAIL
+    let transporter = nodemailer.createTransport({
+        host: "smtp.zoho.in",
+        port: 465,
+        secure:true,
+        auth: {
+          user: "armaan@frankleads.io",
+          pass: process.env.EMAIL_PASSWORD!,
+        },
+    })
+
+    try {
+        let info = await transporter.sendMail({
+          from: '"FrankLeads" <armaan@frankleads.io>',
+          to: "armaan@frankleads.io, wesley@frankleads.io",
+          subject: "Yay! A new user has signed up",
+          html: `A new user has signed up!<br>Email: ${userEmail}`,
+        })
+    
+        console.log("Message sent to founders: %s", info.messageId)
+      } catch (error) {
+        console.error(error)
+      }
 }
