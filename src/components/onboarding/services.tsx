@@ -1,4 +1,5 @@
 import type React from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -31,11 +32,20 @@ interface ServiceAreasProps {
 }
 
 export default function ServiceAreas({ data, updateData, onNext, onBack }: ServiceAreasProps) {
+  const [customService, setCustomService] = useState("")
+
   const toggleService = (service: string) => {
     const updated = data.serviceAreas.includes(service)
       ? data.serviceAreas.filter((s) => s !== service)
       : [...data.serviceAreas, service]
     updateData({ serviceAreas: updated })
+  }
+
+  const addCustomService = () => {
+    if (customService.trim() && !data.serviceAreas.includes(customService)) {
+      updateData({ serviceAreas: [...data.serviceAreas, customService.trim()] })
+      setCustomService("")
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,6 +76,22 @@ export default function ServiceAreas({ data, updateData, onNext, onBack }: Servi
                 {service}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Add Custom Service</Label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customService}
+              onChange={(e) => setCustomService(e.target.value)}
+              placeholder="Enter custom service"
+              className="flex-1 p-2 border rounded-lg"
+            />
+            <Button type="button" onClick={addCustomService}>
+              Add
+            </Button>
           </div>
         </div>
 
