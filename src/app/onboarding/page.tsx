@@ -131,7 +131,7 @@ export default function Onboarding() {
         showConfirmButton: false
       }).then(() => {
         // Redirect to dashboard
-        localStorage.setItem('onboard', 'true')
+        localStorage.setItem('onboard', 'just_done')
 
         router.push('/api/reddit/auth')
         //router.push('/dashboard')

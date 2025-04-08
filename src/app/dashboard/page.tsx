@@ -108,6 +108,29 @@ function DashboardContent() {
     }
   }
 
+  useEffect(()=>{
+    if(window!==null){
+      let getOnboard = localStorage.getItem("onboard")
+      if(getOnboard==="just_done"){
+        //popup the campaign creation
+        MySwal.fire({
+          title: "Welcome to FrankLeads!",
+          text: "Let's create your first campaign.",
+          icon: "success",
+          showConfirmButton: true,
+          confirmButtonText: "Create Campaign",
+          cancelButtonText: "Later",
+          allowOutsideClick: false,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            handleCampaignCreation(true)
+          }
+        }
+        )
+      }
+    }
+  }, [])
+
   useEffect(() => {
     checkFeedback()
   }, [campaigns])
@@ -165,7 +188,7 @@ function DashboardContent() {
   }, [])
 
 
-  function handleCampaignCreation() {
+  function handleCampaignCreation(isOnboarding?: boolean) {
     if(window!==null){
       MySwal.fire({
         html: <CampaignCreator />,
@@ -180,6 +203,9 @@ function DashboardContent() {
     })
     .then((result:any) => {
       fetchLeads()
+      if(isOnboarding){
+        localStorage.setItem("onboard", "true")
+      }
       //make the feedback bot appear
       if (!hasFeedback && campaigns.length > 0) {
         setAskForFeedback(true)
