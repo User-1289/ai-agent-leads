@@ -116,6 +116,7 @@ export async function GET(request: NextRequest) {
             role: 'user',
             content: `Here are the posts I found: ${JSON.stringify(openaiArr)}. 
             IMPORTANT: Only select URLs from this exact list. Do not hallucinate or create any URLs that are not in this list.
+            IMPORTANT: Pick minimum 10 and maximum 20 posts that match my skills.
             For each match, provide a brief reason why this post matches my skills.`
           }
         ],
@@ -155,9 +156,6 @@ export async function GET(request: NextRequest) {
         }
       });
     });
-
-    //return NextResponse.json({message: "Leads saved successfully", leads: JSON.parse(jsonMatch)}, {status: 200});
-    //return NextResponse.json({ results: finalResults }, { status: 200 });
 
     try {
       if (!mongoose.connection.readyState) {
